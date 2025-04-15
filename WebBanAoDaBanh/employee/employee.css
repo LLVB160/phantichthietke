@@ -1,0 +1,302 @@
+*{box-sizing: border-box;} 
+html, body {
+    margin: 0;
+    background: lightgray;
+}
+
+#tab_menu{
+    float: left;
+    width: 15%;
+    height: 100%;
+    border-right: 1px solid black;
+    /* background: lightgray; */
+}
+
+#tab_menu div{
+    border-bottom: 1px solid black;
+}
+
+#tab_menu a{
+    text-decoration: none;
+    display:inline-block;
+    text-align: center;
+    padding: 5px 0px;
+    color: black;
+    width:100%;
+}
+#tab_menu a:hover{
+    background: white;
+}
+
+#main_content{
+    float: left;
+    width: 85%;
+    /* background-color: lightgray;  */
+/*     border: 5px solid lightgray; */
+    height: 90%;
+}
+
+.top_label{
+    padding: 5px;
+    font-size: x-large;
+    font-weight: bolder;
+}
+
+#products_container{
+    height: 91%;
+    overflow: scroll;
+    border-top: 3px solid black;
+    margin-top: 10px;
+    /* border: 5px solid red; */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 sản phẩm trên mỗi hàng */
+    gap: 5px; /* Khoảng cách giữa các sản phẩm */
+    padding: 10px; /* Khoảng cách bên trong của container */
+}
+@media only screen and (max-width: 1096px) {
+    #products_container{
+        height: 100%;
+        overflow: scroll;
+        border-top: 3px solid black;
+        margin-top: 10px;
+        /* border: 5px solid red; */
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px; /* Khoảng cách giữa các sản phẩm */
+        padding: 10px; /* Khoảng cách bên trong của container */
+    }
+    #main_content{
+        float: left;
+        width: 85%;
+        /* background-color: lightgray;  */
+    /*     border: 5px solid lightgray; */
+        height: 80%;
+    }
+  }
+@media only screen and (max-width: 830px) {
+    #products_container{
+        height: 100%;
+        overflow: scroll;
+        border-top: 3px solid black;
+        margin-top: 10px;
+        /* border: 5px solid red; */
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px; /* Khoảng cách giữa các sản phẩm */
+        padding: 10px; /* Khoảng cách bên trong của container */
+    }
+  }
+@media only screen and (max-width: 560px) {
+    #products_container{
+        height: 90%;
+        overflow: scroll;
+        border-top: 3px solid black;
+        margin-top: 10px;
+        /* border: 5px solid red; */
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 5px; /* Khoảng cách giữa các sản phẩm */
+        padding: 10px; /* Khoảng cách bên trong của container */
+    }
+    #main_content{
+        float: left;
+        width: 85%;
+        /* background-color: lightgray;  */
+    /*     border: 5px solid lightgray; */
+        height: 85%;
+    }
+  }
+
+#products_container2{
+    height: 85%;
+
+    /* border: 5px solid red; */
+
+}
+
+.product{
+    align-items: center;
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    background-color: white;
+    height: fit-content;
+}
+.product img {
+    width: 200px;              /* Đặt chiều rộng ảnh bằng chiều rộng của container */
+    height: 230px;             /* Chiều cao cố định của ảnh */
+    object-fit: cover;         /* Để ảnh vừa khung, tự cắt khi vượt quá khung */
+}
+
+#orders_container{
+/*     border-top: 3px solid black;
+    margin-top: 10px;
+    overflow: scroll;
+    height: 100%; */
+    margin-top: 5px;
+    /*height: 105%;*/
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Đảm bảo các cột có kích thước cố định */
+}
+
+tbody {
+    display: block;
+     /* Bạn có thể thay đổi chiều cao tối đa tùy ý */
+}
+table, th, td {
+    border: 1px solid darkblue;
+}
+tr {
+    width: 100%;
+    display: table;
+    table-layout: fixed; /* Đảm bảo các cột trong tbody cũng có cùng kích thước */
+}
+td {
+    text-align: center;
+    padding: 8px;
+}
+
+thead tr:first-child {
+    background-color: lightgreen;
+    font-weight: bold;
+    
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* Màu nền cho hàng chẵn */
+}
+tr:nth-child(odd) {
+    background-color: #ffffff; /* Màu nền cho hàng lẻ */
+}
+
+
+/* button {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #45a049;
+} */
+/*cho form thêm sản phẩm*/
+.container{
+    display: flex;
+    padding: 3px;
+    margin-bottom: 5px;
+}
+.container .item1{
+    width: 30%;
+    text-align: right;
+}
+.container .item2{
+    width: 60%;
+    text-align: left;
+    
+}
+
+/*cho chi tiết đơn hàng*/
+.product-header, .product-row {
+    display: flex;
+
+    padding: 8px 0;
+}
+
+.product-header {
+    border-bottom: 2px solid #333;
+    font-weight: bold;
+    background-color: #f0f0f0;
+}
+
+.product-row {
+    border-bottom: 1px solid #ddd;
+}
+
+.product-cell {
+    flex: 1;
+    text-align: left;
+    padding: 0 8px;
+}
+
+.total span {
+    color: #d9534f;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Cấu hình cho modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /*z-index: 1; Sit on top */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% 20%;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+}
+
+
+
+/* The Close Button */
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+.close:hover, .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Logout button styling */
+#logoutButton {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px 20px;
+    background-color: #dc3545; /* Red color */
+    color: white;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+#logoutButton:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+#logoutButton:active {
+    transform: scale(0.98); /* Slightly shrink on click */
+}
+#userInfo {
+    position: fixed;
+    top: 10px;
+    right: 150px;
+    background-color: blue;
+    padding: 5px 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    color: white;
+}
