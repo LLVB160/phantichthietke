@@ -3,6 +3,26 @@ window.onload = updateCartTotal();/*mở cửa sổ lên mặc định gọi hà
 let currUser = JSON.parse(localStorage.getItem('currentuser'));
 
 
+document.addEventListener("DOMContentLoaded", function () {
+    // Gọi API để lấy danh sách sản phẩm từ cơ sở dữ liệu
+    fetch('get_products.php?page=1&limit=100') // Thay URL này bằng API của bạn
+        .then(response => response.json())
+        .then(data => {
+            if (data.products && data.products.length > 0) {
+                // Xóa mảng products cũ trong localStorage
+                localStorage.removeItem('products');
+
+                // Lưu danh sách sản phẩm mới vào localStorage
+                localStorage.setItem('products', JSON.stringify(data.products));
+                console.log("Danh sách sản phẩm mới đã được lưu vào localStorage:", data.products);
+            } else {
+                console.error("Không có sản phẩm nào được trả về từ API.");
+            }
+        })
+        .catch(error => {
+            console.error("Lỗi khi lấy danh sách sản phẩm từ API:", error);
+        });
+});
 
 LoadCount = () => {
     let countCart = document.getElementById('count');
@@ -375,8 +395,8 @@ function closeModal() {
 
 function addToCart(productId) {
     // Lấy danh sách sản phẩm từ localStorage
-    let products = JSON.parse(localStorage.getItem('products'));
-    const product = products.find(p => p.masp === productId);
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const product = products.find(item => item.product_id === productId);
 
     if (!product) {
         alert("Sản phẩm không tồn tại trong kho.");
@@ -397,42 +417,28 @@ function addToCart(productId) {
         return;
     }
 
-    // Khởi tạo giỏ hàng
-    let cart = [];
-    if (localStorage.getItem('cart') == null) {
-        // Thêm sản phẩm mới vào giỏ hàng với số lượng mặc định là 1
-        if (product.stock >= 1) {
-            cart = [{ ...product, soluong: 1, username }];
+    // Lấy giỏ hàng từ localStorage
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
+    let existingProduct = cart.find(item => item.product_id === productId && item.username === username);
+
+    if (existingProduct) {
+        // Nếu sản phẩm đã tồn tại, kiểm tra tồn kho trước khi tăng số lượng
+        if (existingProduct.soluong + 1 > product.quantity) {
+            alert("Không đủ sản phẩm trong kho để thêm vào giỏ hàng.");
+            return;
         }
+        existingProduct.soluong += 1;
     } else {
-        cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        let ok = true;
-
-        // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
-        for (let x of cart) {
-            if (x.masp === productId && x.username === username) {
-                if (x.soluong + 1 > product.stock) {
-                    alert("Không đủ sản phẩm trong kho để thêm vào giỏ hàng.");
-                    return;
-                }
-                x.soluong += 1;
-                ok = false;
-                break;
-            }
-        }
-
         // Nếu sản phẩm chưa tồn tại, thêm mới vào giỏ hàng
-        if (ok) {
-            if (product.stock >= 1) {
-                cart.push({ ...product, soluong: 1, username });
-            }
-        }
+        cart.push({ ...product, soluong: 1, username });
     }
 
     // Lưu giỏ hàng vào localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
     alert("Thêm sản phẩm vào giỏ hàng thành công!");
-    LoadCount();
+    LoadCount(); // Cập nhật số lượng sản phẩm trong giỏ hàng
 }
 
 const products_1 = JSON.parse(localStorage.getItem('products')) || [];
@@ -464,20 +470,18 @@ async function showPage(page) {
     const productList = document.querySelector("#product-wrapper"); // Container chứa sản phẩm
 
     try {
-        // Gọi API để lấy dữ liệu sản phẩm từ database
-        const response = await fetch(`http://localhost:3000/api/products?page=${page}&limit=${itemsPerPage}`);
-        if (!response.ok) {
-            throw new Error(`Lỗi server: ${response.statusText}`);
-        }
-        const data = await response.json();
-
+        // Gọi API PHP để lấy dữ liệu sản phẩm
+        const response = await fetch(`get_products.php?page=${page}&limit=${itemsPerPage}`);
+        const text = await response.text();
+        console.log(text); // Kiểm tra nội dung trả về
+        const data = JSON.parse(text); // Chuyển đổi dữ liệu JSON thành đối tượng JavaScript;
         let productsHTML = ""; // Biến chứa HTML của các sản phẩm
         const products = data.products; // Lấy danh sách sản phẩm từ API
 
         // Hiển thị sản phẩm
         if (products.length > 0) {
             products.forEach(product => {
-                const formattedPrice = product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }); // Định dạng giá
+                const formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price);
 
                 productsHTML += `
                     <div class="product-item">
@@ -982,30 +986,33 @@ function hienthichinhsach() { /*chính sách*/
         ;
 }
 
-function showProductDetail(productId) {// hiện chi tiết sản phẩm khi ấn chi tiết
-    const products = JSON.parse(localStorage.getItem('products')) || [];  // Lấy danh sách sản phẩm từ localStorage
-    const product = products.find(item => item.masp === productId);// Tìm sản phẩm theo ID
+function showProductDetail(productId) {
+    // Lấy danh sách sản phẩm từ localStorage
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    // Tìm sản phẩm theo ID
+    const product = products.find(item => item.product_id === productId);
+
     if (product) {
         const detailDiv = document.querySelector(".product-detail");
-        detailDiv.innerHTML = `
+        detailDiv.innerHTML = ` 
             <div class="detail-container">
                 <h3>THÔNG TIN CHI TIẾT SẢN PHẨM</h3>
-                <img src="${product.image_url}" alt="${product.tensp}">
-                <p><strong>Mã sản phẩm:</strong> ${product.masp}</p>
-                <p><strong>Tên sản phẩm:</strong> ${product.tensp}</p>
+                <img src="${product.img_url}" alt="${product.name}">
+                <p><strong>Mã sản phẩm:</strong> ${product.product_id}</p>
+                <p><strong>Tên sản phẩm:</strong> ${product.name}</p>
                 <p><strong>Mô tả:</strong> ${product.description}</p>
-                <p><strong>Kích thước:</strong> ${product.size}</p>
-                <p><strong>Giá:</strong> ${product.price.toLocaleString().replace(/,/g, '.')} VND</p>
-                <p><strong>Còn lại:</strong> ${product.stock}</p>
-                <button onclick="addToCart('${product.masp}'), closeDetail() ">MUA NGAY</button>
+                <p><strong>Giá:</strong> ${product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</p>
+                <p><strong>Còn lại:</strong> ${product.quantity}</p>
+                <button onclick="addToCart('${product.product_id}')">MUA NGAY</button>
                 <button onclick="closeDetail()">Đóng</button>
             </div>
         `;
-        detailDiv.style.display = "block"; // Hiển thị div
-        document.body.classList.add('no-scroll');
+        detailDiv.style.display = "block"; // Hiển thị div chi tiết sản phẩm
+        document.body.classList.add('no-scroll'); // Ngăn cuộn trang khi hiển thị chi tiết
+    } else {
+        alert("Không tìm thấy thông tin sản phẩm.");
     }
 }
-
 function closeDetail() { //đóng chi tiết sản phẩm
     const detailDiv = document.querySelector(".product-detail");
     detailDiv.style.display = "none"; // Ẩn div chi tiết
