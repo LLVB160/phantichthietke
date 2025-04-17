@@ -442,90 +442,73 @@ const itemsPerPage = 6;//số sản phẩm trên 1 trang
 
 let totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-function renderPagination() {// hàm để tạo mấy nút phân trang 
-    // Tổng số trang
-    totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+function renderPagination(totalPages, currentPage) {
     const paginationButtons = document.querySelector(".pagination-btn");
-
-    let startPage = Math.max(currentPage - 1, 1);
-    let endPage = Math.min(startPage + 2, totalPages);
-
-    if (endPage === totalPages) {
-        startPage = Math.max(totalPages - 2, 1);
-    }
     let paginationHTML = "";
 
-    for (let i = startPage; i <= endPage; i++) {
+    for (let i = 1; i <= totalPages; i++) {
         paginationHTML += `
-        <button class="${i === currentPage ? 'active' : ''}" onclick="showPage(${i})">
-            ${i}
-        </button>
-    `;
+            <button class="${i === currentPage ? 'active' : ''}" onclick="showPage(${i})">
+                ${i}
+            </button>
+        `;
     }
-    paginationButtons.innerHTML = paginationHTML;
-    if(totalPages === 1) {
-        document.querySelector('.pagination').style.display = 'none';
-        document.querySelector('.chevron-left').style.display = 'none';
-        document.querySelector('.chevron-right').style.display = 'none';
-        
-    }
-    else {
-        document.querySelector('.pagination').style.display = 'flex';
-        document.querySelector('.chevron-left').style.display = 'flex';
-        document.querySelector('.chevron-right').style.display = 'flex';
-    }
-}
 
-function showPage(page) { //hiển thị sản phẩm
+    paginationButtons.innerHTML = paginationHTML;
+
+    document.querySelector('.chevron-left').style.display = currentPage > 1 ? 'flex' : 'none';
+    document.querySelector('.chevron-right').style.display = currentPage < totalPages ? 'flex' : 'none';
+}
+async function showPage(page) {
     currentPage = page;
-    const start = (page - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
     const productList = document.querySelector("#product-wrapper"); // Container chứa sản phẩm
 
-    let productsHTML = ""; // Biến chứa HTML của các sản phẩm
-    const pageProducts = filteredProducts.slice(start, end); // Lấy danh sách sản phẩm cho trang hiện tại
+    try {
+        // Gọi API để lấy dữ liệu sản phẩm từ database
+        const response = await fetch(`http://localhost:3000/api/products?page=${page}&limit=${itemsPerPage}`);
+        if (!response.ok) {
+            throw new Error(`Lỗi server: ${response.statusText}`);
+        }
+        const data = await response.json();
 
-    const paginationButtons = document.querySelectorAll('.pagination-btn button');
-    paginationButtons.forEach(button => {
-        button.classList.remove('active');
-    });
+        let productsHTML = ""; // Biến chứa HTML của các sản phẩm
+        const products = data.products; // Lấy danh sách sản phẩm từ API
 
-    const selectedButton = document.querySelector(`.pagination-btn button:nth-child(${page})`);
-    if (selectedButton) {
-        selectedButton.classList.add('active');
-    }
+        // Hiển thị sản phẩm
+        if (products.length > 0) {
+            products.forEach(product => {
+                const formattedPrice = product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }); // Định dạng giá
 
-    if (pageProducts.length !== 0) {
-        pageProducts.forEach(product => {
-            const formattedPrice = product.price.toLocaleString().replace(/,/g, '.'); // Định dạng giá
-
-            productsHTML += `
-                <div class="product-item"">
-                    <div class="container-product-item">
-                        <img src="${product.image_url}" alt="${product.tensp}">
-                        <button class="buyButton" onclick="addToCart('${product.masp}')">MUA NGAY</button> 
-                        <button class="detailProduct" onclick="showProductDetail('${product.masp}')">CHI TIẾT</button> 
+                productsHTML += `
+                    <div class="product-item">
+                        <div class="container-product-item">
+                            <img src="${product.img_url}" alt="${product.name}">
+                            <button class="buyButton" onclick="addToCart('${product.product_id}')">MUA NGAY</button> 
+                            <button class="detailProduct" onclick="showProductDetail('${product.product_id}')">CHI TIẾT</button> 
+                        </div>
+                        <div class="product-info" style="color:#322A2A">
+                            <p><strong>Tên sản phẩm:</strong> ${product.name}</p>
+                            <p><strong>Mô tả:</strong> ${product.description}</p>
+                            <p><strong>Giá:</strong> ${formattedPrice}</p>
+                            <p><strong>Số lượng:</strong> ${product.quantity}</p>
+                        </div>
                     </div>
-                   <div class="product-info" style="color:#322A2A">
-                        <p><strong>Tên sản phẩm:</strong> ${product.tensp}</p>
-                        <p><strong>Kích thước:</strong> ${product.size}</p>
-                        <p><strong>Giá:</strong> ${formattedPrice} VND</p>
-                    </div>
-                </div>
-            `;
-        });
+                `;
+            });
+        } else {
+            productsHTML = `<div class="empty">Không có sản phẩm nào.</div>`;
+        }
 
-        productList.innerHTML = productsHTML; // ập nhật HTML danh sách sản phẩm
-    } else {
-        productList.innerHTML = `
-        <div class="empty">Cửa hàng hiện chưa có sản phẩm theo yêu cầu của bạn. Xin lỗi vì sự bất tiện.</div>
-        `;
-        document.querySelector('.pagination').style.display = 'none';
-        document.querySelector('.chevron-left').style.display = 'none';
-        document.querySelector('.chevron-right').style.display = 'none';
+        productList.innerHTML = productsHTML; // Gắn HTML vào thẻ product-wrapper
+
+        // Cập nhật phân trang
+        renderPagination(data.totalPages, data.currentPage);
+    } catch (error) {
+        console.error('Lỗi khi lấy sản phẩm:', error);
+        productList.innerHTML = `<div class="error">Không thể tải sản phẩm. Vui lòng thử lại sau.</div>`;
     }
-    renderPagination(); // gọi hàm tạo nút phân trang
 }
+
 
 document.querySelector(".chevron-left").onclick = prevPage; // nút lên 1 trang
 document.querySelector(".chevron-right").onclick = nextPage; // nút giảm 1 trang
@@ -761,38 +744,7 @@ let selectedNations = []; // mảng lưu các lựa chọn ÁO THEO QUỐC GIA
 let selectedClubs = []; // mảng lưu các lựa chọn ÁO THEO CÂU LẠC BỘ
 let selectedPriceRanges = []; // Mảng để lưu các khoảng giá 
 
-// Gắn sự kiện click cho danh mục quốc gia
-document.querySelectorAll(".category-nation li").forEach(link => {
-    link.addEventListener("click", event => {
-        // này là để tránh trường hợp dùng search xong không làm mới mà bấm vào danh mục
-        document.querySelector('#advanced-search-category-select').value = "all";
-        toggleSelectBox();
-        document.getElementById('min-price').value = "";
-        document.getElementById('max-price').value = "";
-        document.querySelector('#form-search-input').value = "";
 
-        const target = event.currentTarget;
-
-        switch (target.textContent) {
-            case "Anh":
-                toggleNation("EN");
-                break;
-            case "Pháp":
-                toggleNation("PR");
-                break;
-            case "Bồ Đào Nha":
-                toggleNation("PO");
-                break;
-            case "Argentina":
-                toggleNation("AG");
-                break;
-            case "Việt Nam":
-                toggleNation("VN");
-                break;
-        }
-        target.classList.toggle("active");
-    });
-});
 
 // Gắn sự kiện click cho danh mục mùa giải
 document.querySelectorAll(".category-club li").forEach(link => {
@@ -859,16 +811,6 @@ document.querySelectorAll(".category-price li").forEach(link => {
         target.classList.toggle("active");
     });
 });
-
-function toggleNation(nation) {// Hàm xử lý khi click vào quốc gia
-    const index = selectedNations.indexOf(nation);
-    if (index === -1) {
-        selectedNations.push(nation);
-    } else {
-        selectedNations.splice(index, 1);
-    }
-    filterProducts();
-}
 
 function toggleClub(Club) {// Hàm xử lý khi click vào mùa giải
     const index = selectedClubs.indexOf(Club);
@@ -1569,6 +1511,5 @@ function loadDistrictsorder(selectedCity, diachiData) {// load ra các quận/hu
       console.log('Không tìm thấy thành phố được chọn:', selectedCity);
     }
 }
-
 
 /*-------------------------------------------------------------------------------------*/
