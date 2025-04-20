@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <ul class="nav-list">
+                <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/user" style="color: white;">Users</a></li>
+                <li><a href="/product">Products</a></li>
+                <li><a href="/orders">Orders</a></li>
+                <li><a href="/supplier">Supplier</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% if message %}
+        <div class="message" id="message">{{message}}</div>
+        {% endif %}
+        <div style="margin-top: 20px;">
+            <a href="/user/new-user" id="createBtn">Create</a>
+        </div>
+  
+
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>ID</th>
+                    <th>Full name</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td><a  href="/user/update-user/{{ user.user_id }}" style="text-decoration: none; color: black;">
+                            <i class="fa-solid fa-pencil" id="sua"></i>
+                        </a>
+                        <a href="/user/delete-user/{{ user.user_id }}" style="text-decoration: none; color: black;" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">
+                            <i class="fa-solid fa-trash" id="xoa"></i>
+                        </a>
+                    </td>
+                    <td>{{ user.user_id }}</td>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.role }}</td>
+                    <td>{{ user.phone }}</td>
+                    <td>{{ user.email }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+    </div>
+</body>
+</html>

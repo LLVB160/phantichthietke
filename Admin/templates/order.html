@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="container">
+        {% if current_user.role == 'admin'%}
+        <nav>
+            <ul class="nav-list">
+                <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/user">Users</a></li>
+                <li><a href="/product">Products</a></li>
+                <li><a style="color: white" href="/orders">Orders</a></li>
+                <li><a href="/supplier" >Suppliers</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% elif current_user.role == 'employee' %}
+        <nav>
+            <ul class="nav-list">
+                <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a style="color: white" href="/orders">Orders</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% if message %}
+        <div class="message" id="message">{{message}}</div>
+        {% endif %}
+        <div class="toolbar" style="margin-top: 20px;">
+            <a href="/order/stats" id="createBtn">Stats</a>
+            <a href="/orders/export" class="btn">Export</a>
+            <form action="#" method="post">
+                <input type="date" name="start_date" placeholder="Start Date" required>
+                <input type="date" name="end_date" placeholder="End Date" required>
+
+                <button type="submit">Search</button>
+            </form>
+        </div>
+  
+        {% if orders %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User ID</th>
+                    <th>Full name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Order Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for o, u in orders %}
+                <tr>
+                    <td>{{o.order_id}}</td>
+                    <td>{{u.user_id}}</td>
+                    <td>{{u.full_name}}</td>   
+                    <td>{{u.phone}}</td>
+                    <td>{{u.address}}</td>
+                    <td>{{o.order_date}}</td>
+                    <td>{{o.total_amount}}</td>
+                    <td>
+                        <select name="status" id="status" data-id="{{ o.order_id }}" class="status-select">
+                            
+                            <option value="{{ o.status }}" selected>{{ o.status }}</option>
+                        
+                            {% set all_statuses = ['pending', 'shipping', 'shipped', 'cancelled'] %}
+                            {% for s in all_statuses %}
+                                {% if s != o.status %}
+                                    <option value="{{ s }}">{{ s }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        
+                    </td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="container-no-order">
+            <div class="no-order">No orders found</div>
+        </div>
+
+        {% endif %}
+
+
+    </div>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

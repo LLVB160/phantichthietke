@@ -1,0 +1,155 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Noto Sans', sans-serif
+}
+
+.container {
+    width: 80vw;
+    margin: 0 auto;
+}
+
+nav {
+    background-color: #212529;
+    width: 100%;
+}
+
+ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+}
+
+li a {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+nav li {
+    color: #FFFFFF80;
+
+}
+nav li a{
+    color: #FFFFFF80;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+}
+thead {
+    color: rgb(11, 116, 237);
+}
+th, td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+tr td i {
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+#createBtn {
+    color:rgb(38, 136, 249);
+    padding: 10px;
+    border : 1px solid rgb(38, 136, 249);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn {
+    color:rgb(38, 136, 249);
+    padding: 10px;
+    border : 1px solid rgb(38, 136, 249);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.message {
+    margin-top: 20px;
+    text-align: center;
+    color: rgb(11, 116, 237);
+} 
+
+.btn-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.search-product input {
+    padding: 10px;
+    font-style: 16px;
+    /* border: none; */
+    border-radius: 5px;
+    border : 1px solid #ccc;
+}
+.search-product button {
+    padding: 10px;
+    background-color: rgb(11, 116, 237);
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;        
+}
+
+#status {
+    padding: 3px;
+    font-style: 13px;
+    border-radius: 5px;
+    border : 1px solid #ccc;
+}
+
+.toolbar {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.toolbar input {
+    padding: 8px;
+    font-style: 16px;
+    /* border: none; */
+    border-radius: 5px;
+    border : 1px solid #ccc;
+}
+
+.toolbar button {
+    padding: 8px;
+    background-color: rgb(11, 116, 237);
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;        
+}
+
+.container-no-order{
+    display: flex;
+    justify-content: center; /* căn giữa theo chiều ngang */
+    align-items: center;     /* căn giữa theo chiều dọc */
+    height: 100vh;           /* chiều cao full màn hình */
+  }
+  
+.no-order {
+    font-size: 24px;
+    color: #555;
+  }
+
+.total{
+    margin:30px;
+    font-size: 25px;
+    text-align: right;
+}

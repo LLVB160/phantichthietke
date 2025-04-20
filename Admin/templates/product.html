@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="container" style="font-size: 15px;">
+        {% if current_user.role == 'admin'%}
+        <nav>
+            <ul class="nav-list">
+                <li ><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/user">Users</a></li>
+                <li><a href="/product" style="color: white">Products</a></li>
+                <li><a href="/orders">Orders</a></li>
+                <li><a href="/supplier">Suppliers</a></li>
+
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% elif current_user.role == 'warehouse_manager' %}
+        <nav>
+            <ul class="nav-list">
+                <li ><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/product" style="color: white">Products</a></li>
+                <li><a href="/supplier">Suppliers</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% endif %}
+
+
+        {% if message %}
+        <div class="message" id="message">{{message}}</div>
+        {% endif %}
+        <div style="margin-top: 20px;" class="btn-container">
+            <a href="/product/new-product" id="createBtn" class="btn">Create</a>
+
+            <a href="{{ url_for('productManager', sort='name', search=request.args.get('search', '')) }}" class="btn">Sort by name</a>
+
+            <a href="{{ url_for('productManager', sort='supplier', search=request.args.get('search', '')) }}" class="btn">Sort by Supplier</a>
+
+
+
+            <form action="{{ url_for('productManager') }}" method="get" class="search-product">
+                <input type="text" name="search" placeholder="Search by name, supplier">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+
+  
+        {% if products %}
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Desciption</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Img Url</th>
+                    <th>Category ID</th>
+                    <th>Supplier Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product, supp in products %}
+                <tr>
+                    <td><a  href="/product/update-product/{{ product.product_id }}" style="text-decoration: none; color: black; ">
+                            <i class="fa-solid fa-pencil" id="sua"></i>
+                        </a>
+                        <a href="/product/delete-product/{{ product.product_id }}" style="text-decoration: none; color: black;" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">
+                            <i class="fa-solid fa-trash" id="xoa"></i>
+                        </a>
+                    </td>
+                    <td>{{ product.product_id }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.description }}</td>
+                    <td>{{ product.price }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.img_url }}</td>
+                    <td>{{ product.category_id }}</td>
+                    <td>{{ supp.name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="container-no-order">
+            <div class="no-order">No products found</div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

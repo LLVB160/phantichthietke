@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="container">
+        {% if current_user.role == 'admin'%}
+        <nav>
+            <ul class="nav-list">
+                <li ><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/user">Users</a></li>
+                <li><a href="/product" >Products</a></li>
+                <li><a href="/orders">Orders</a></li>
+                <li><a href="/supplier" style="color: white">Suppliers</a></li>
+
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% elif current_user.role == 'warehouse_manager' %}
+        <nav>
+            <ul class="nav-list">
+                <li ><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/product" >Products</a></li>
+                <li><a href="/supplier" style="color: white">Suppliers</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% endif %}
+
+
+        {% if message %}
+        <div class="message" id="message">{{message}}</div>
+        {% endif %}
+        <div style="margin-top: 20px;">
+            <a href="/supplier/new-supplier" id="createBtn">Create</a>
+        </div>
+  
+
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supp in suppliers %}
+                <tr>
+                    <td><a  href="/supplier/update-supplier/{{ supp.supplier_id }}" style="text-decoration: none; color: black;">
+                            <i class="fa-solid fa-pencil" id="sua"></i>
+                        </a>
+                        <a href="/supplier/delete-supplier/{{ supp.supplier_id }}" style="text-decoration: none; color: black;" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">
+                            <i class="fa-solid fa-trash" id="xoa"></i>
+                        </a>
+                    </td>
+                    <td>{{supp.supplier_id }}</td>
+                    <td>{{supp.name }}</td>
+                    <td>{{supp.phone }}</td>
+                    <td>{{supp.email }}</td>
+                    <td>{{supp.address }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+    </div>
+</body>
+</html>

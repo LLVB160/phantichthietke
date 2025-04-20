@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New User</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .new-user {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      width: 60%;
+      
+    }
+    .new-user h2 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+    .new-user input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .new-user button {
+    
+      padding: 12px;
+      background: #007bff;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .new-user button:hover {
+      background: #0056b3;
+    }
+    .message {
+      margin-top: 10px;
+      text-align: center;
+      color: red;
+    }
+    .new-user div{
+        display: flex;
+        
+        align-items: center;
+    }
+    .cancel {
+        background-color: red;
+        border-radius: 5px;
+        border: none;
+        margin-left: 15px;
+        display: inline-block;
+        color: white;
+        padding: 10px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .cancel:hover {
+        background-color: darkred;
+    }
+    select {
+
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .new-user {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <div class="new-user">
+    <h2>Create New User</h2>
+    <form action="/user/new-user" method="post">
+        <input type="text" id="username" name="username" placeholder="Username" required/>
+        <input type="password" id="password" name="password" placeholder="Password" required/>
+        <input type="text" id="fullname" name="fullname" placeholder="Full Name" required/>
+        <input type="number" id="phone" name="phone" placeholder="Phone" required/>
+        <input type="Email" id="email" name="email" placeholder="Email" required/>
+        <input type="text" id="address" name="address" placeholder="Address" required/>
+        <select name="role" id="role" placeholder="Role" required>
+          <option value="customer">Customer</option>
+          <option value="employee">Employee</option>
+          <option value="admin">Admin</option>
+          <option value="warehouse_manager">Warehouse Manager</option>
+      </select>
+        <div>
+            <button type="submit">Save</button>
+            <a class="cancel" href="/user">Cancel</a>
+        </div>
+
+        
+    </form>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        {% if current_user.role == 'admin'%}
+        <nav>
+            <ul class="nav-list">
+                <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/user">Users</a></li>
+                <li><a href="/product">Products</a></li>
+                <li><a href="/orders">Orders</a></li>
+                <li><a href="/supplier">Suppliers</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% elif current_user.role == 'employee' %}
+        <nav>
+            <ul class="nav-list">
+                <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/orders">Orders</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% else %}
+        <nav>
+            <ul class="nav-list">
+                <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/product">Products</a></li>
+                <li><a href="/supplier">Suppliers</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+        {% endif %}
+  
+
+
+    </div>
+</body>
+</html>
