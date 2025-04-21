@@ -10,6 +10,8 @@
 </head>
 <body>
     <div class="container">
+        <p class="user_name">{{current_user.full_name}}</p>
+
         {% if current_user.role == 'admin'%}
         <nav>
             <ul class="nav-list">
@@ -36,7 +38,7 @@
         {% endif %}
         <div class="toolbar" style="margin-top: 20px;">
             <a href="/order/stats" id="createBtn">Stats</a>
-            <a href="/orders/export" class="btn">Export</a>
+            <a href="/orders/export" class="export-btn">Export</a>
             <form action="#" method="post">
                 <input type="date" name="start_date" placeholder="Start Date" required>
                 <input type="date" name="end_date" placeholder="End Date" required>

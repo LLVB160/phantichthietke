@@ -8,6 +8,8 @@
 </head>
 <body>
     <div class="container">
+        <p class="user_name">{{current_user.full_name}}</p>
+
         {% if current_user.role == 'admin'%}
         <nav>
             <ul class="nav-list">

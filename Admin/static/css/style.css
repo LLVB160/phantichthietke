@@ -63,9 +63,17 @@ tr td i {
 }
 
 #createBtn {
-    color:rgb(38, 136, 249);
+    /* color:rgb(38, 136, 249); */
     padding: 10px;
-    border : 1px solid rgb(38, 136, 249);
+    border-radius: 5px;
+    color: white;
+    /* background-color: rgb(15, 188, 90); */
+    background-color: rgb(11, 116, 237);
+
+    
+    /* background-color: rgb(38, 136, 249); */
+    /* border : 1px solid rgb(38, 136, 249); */
+    border : none;
     cursor: pointer;
     text-decoration: none;
 }
@@ -152,4 +160,54 @@ tr td i {
     margin:30px;
     font-size: 25px;
     text-align: right;
+}
+
+
+.product-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.product-toolbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* margin-bottom: 20px; */
+}
+
+.product-toolbar-right a {
+    /* background-color: #ffc107; */
+    background-color: rgb(11, 116, 237);
+
+
+    border-radius: 5px;
+    border: none;
+    color: white;
+}
+.export-btn {
+    /* color:rgb(38, 136, 249); */
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    /* background-color: rgb(15, 188, 90); */
+    background-color: rgb(11, 116, 237);
+
+    /* background-color: rgb(38, 136, 249); */
+    /* border : 1px solid rgb(38, 136, 249); */
+    border : none;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.user_name {
+    /* color: #fff; */
+    font-size: 13px;
+    /* margin: 20px 0; */
+    color: black;
+    text-align: right;
+}
+.products-btn {
+    display : flex;
+    /* gap: 5px; */
 }

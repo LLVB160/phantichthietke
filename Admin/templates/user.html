@@ -10,6 +10,7 @@
 </head>
 <body>
     <div class="container">
+        <p class="user_name">{{current_user.full_name}}</p>
         <nav>
             <ul class="nav-list">
                 <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
@@ -44,10 +45,10 @@
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td><a  href="/user/update-user/{{ user.user_id }}" style="text-decoration: none; color: black;">
+                    <td><a  href="/user/update-user/{{ user.user_id }}" style="text-decoration: none; color: #5bc0de;">
                             <i class="fa-solid fa-pencil" id="sua"></i>
                         </a>
-                        <a href="/user/delete-user/{{ user.user_id }}" style="text-decoration: none; color: black;" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">
+                        <a href="/user/delete-user/{{ user.user_id }}" style="text-decoration: none; color: red;" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">
                             <i class="fa-solid fa-trash" id="xoa"></i>
                         </a>
                     </td>

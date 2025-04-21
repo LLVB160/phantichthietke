@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +9,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
+
 <body>
     <div class="container" style="font-size: 15px;">
+        <p class="user_name">{{current_user.full_name}}</p>
+
         {% if current_user.role == 'admin'%}
         <nav>
             <ul class="nav-list">
-                <li ><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/admin" style="color: white;">
+                        <h2>ADMIN</h2>
+                    </a></li>
                 <li><a href="/user">Users</a></li>
                 <li><a href="/product" style="color: white">Products</a></li>
                 <li><a href="/orders">Orders</a></li>
@@ -25,7 +31,9 @@
         {% elif current_user.role == 'warehouse_manager' %}
         <nav>
             <ul class="nav-list">
-                <li ><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a href="/admin" style="color: white;">
+                        <h2>ADMIN</h2>
+                    </a></li>
                 <li><a href="/product" style="color: white">Products</a></li>
                 <li><a href="/supplier">Suppliers</a></li>
                 <li><a href="/logout">Logout</a></li>
@@ -37,23 +45,27 @@
         {% if message %}
         <div class="message" id="message">{{message}}</div>
         {% endif %}
-        <div style="margin-top: 20px;" class="btn-container">
-            <a href="/product/new-product" id="createBtn" class="btn">Create</a>
+        <div style="margin-top: 20px;" class="btn-container product-toolbar">
+            <div class="product-toolbar-left">
+                <a href="/product/new-product" id="createBtn" class="btn">Create</a>
+                <form action="{{ url_for('productManager') }}" method="get" class="search-product">
+                    <input type="text" name="search" placeholder="Search by name, supplier">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
 
-            <a href="{{ url_for('productManager', sort='name', search=request.args.get('search', '')) }}" class="btn">Sort by name</a>
 
-            <a href="{{ url_for('productManager', sort='supplier', search=request.args.get('search', '')) }}" class="btn">Sort by Supplier</a>
+            <div class="product-toolbar-right">
+                <a href="{{ url_for('productManager', sort='name', search=request.args.get('search', '')) }}"
+                    class="btn">Sort by name</a>
+                <a href="{{ url_for('productManager', sort='supplier', search=request.args.get('search', '')) }}"
+                    class="btn">Sort by Supplier</a>
+            </div>
 
-
-
-            <form action="{{ url_for('productManager') }}" method="get" class="search-product">
-                <input type="text" name="search" placeholder="Search by name, supplier">
-                <button type="submit">Search</button>
-            </form>
         </div>
 
 
-  
+
         {% if products %}
         <table>
             <thead>
@@ -72,13 +84,22 @@
             <tbody>
                 {% for product, supp in products %}
                 <tr>
-                    <td><a  href="/product/update-product/{{ product.product_id }}" style="text-decoration: none; color: black; ">
-                            <i class="fa-solid fa-pencil" id="sua"></i>
-                        </a>
-                        <a href="/product/delete-product/{{ product.product_id }}" style="text-decoration: none; color: black;" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">
-                            <i class="fa-solid fa-trash" id="xoa"></i>
-                        </a>
+
+                    <td>
+                        <div class="products-btn">
+                            <a href="/product/update-product/{{ product.product_id }}"
+                                style="text-decoration: none; color: #5bc0de;">
+                                <i class="fa-solid fa-pencil" id="sua"></i>
+                            </a>
+                            <a href="/product/delete-product/{{ product.product_id }}"
+                                style="text-decoration: none; color: red;"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">
+                                <i class="fa-solid fa-trash" id="xoa"></i>
+                            </a>
+                        </div>
                     </td>
+
+
                     <td>{{ product.product_id }}</td>
                     <td>{{ product.name }}</td>
                     <td>{{ product.description }}</td>
@@ -98,4 +119,5 @@
         {% endif %}
     </div>
 </body>
+
 </html>

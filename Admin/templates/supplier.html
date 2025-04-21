@@ -10,6 +10,8 @@
 </head>
 <body>
     <div class="container">
+        <p class="user_name">{{current_user.full_name}}</p>
+
         {% if current_user.role == 'admin'%}
         <nav>
             <ul class="nav-list">
@@ -56,10 +58,10 @@
             <tbody>
                 {% for supp in suppliers %}
                 <tr>
-                    <td><a  href="/supplier/update-supplier/{{ supp.supplier_id }}" style="text-decoration: none; color: black;">
+                    <td><a  href="/supplier/update-supplier/{{ supp.supplier_id }}" style="text-decoration: none; color: #5bc0de;">
                             <i class="fa-solid fa-pencil" id="sua"></i>
                         </a>
-                        <a href="/supplier/delete-supplier/{{ supp.supplier_id }}" style="text-decoration: none; color: black;" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">
+                        <a href="/supplier/delete-supplier/{{ supp.supplier_id }}" style="text-decoration: none; color: red;" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">
                             <i class="fa-solid fa-trash" id="xoa"></i>
                         </a>
                     </td>
