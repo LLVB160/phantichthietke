@@ -81,15 +81,29 @@
       transform: translate(-50%, -50%);
     }
   </style>
+<link rel="stylesheet" href="/static/css/style.css">
+
 </head>
 <body>
+  <div class="container">
+    <nav>
+      <ul class="nav-list">
+          <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+          <li><a href="/user">Users</a></li>
+          <li><a href="/product">Products</a></li>
+          <li><a href="/orders">Orders</a></li>
+          <li><a href="/supplier" style="color: white;">Supplier</a></li>
+          <li><a href="/logout">Logout</a></li>
+      </ul>
+    </nav>
+  </div>
   <div class="new-user">
     <h2>Update Supplier</h2>
     <form action="#" method="post">
-        <input type="text" id="name" name="name" placeholder="Name: {{supplier.name}}" />
-        <input type="text" id="phone" name="phone" placeholder="Phone: {{supplier.phone}}" />
-        <input type="email" id="email" name="email" placeholder="Email: {{supplier.email}}" />
-        <input type="text" id="address" name="address" placeholder="Address: {{supplier.address}}" />
+        <input type="text" id="name" name="name" value="{{supplier.name}}" />
+        <input type="text" id="phone" name="phone" value="{{supplier.phone}}" />
+        <input type="email" id="email" name="email" value="{{supplier.email}}" />
+        <input type="text" id="address" name="address" value="{{supplier.address}}" />
         <div>
             <button type="submit">Save</button>
             <a class="cancel" href="/supplier">Cancel</a>

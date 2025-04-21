@@ -161,15 +161,15 @@ def update_user(user_id):
         role = request.form.get('role', '').strip()
         email= request.form.get('email', '').strip()
 
-        if full_name:
+        if full_name != user.full_name:
             user.full_name = full_name
-        if address:
+        if address != user.address:
             user.address = address
-        if phone:
+        if phone != user.phone:
             user.phone = phone  
         if role != user.role:
             user.role = role
-        if email:
+        if email != user.email:
             user.email = email
         
         try:
@@ -307,19 +307,19 @@ def update_product(product_id):
         supplier= request.form.get('supplier', '').strip()
 
 
-        if name:
+        if name != product.name:
             product.name = name
-        if description:
+        if description != product.description:
             product.description = description
-        if price:
+        if price != product.price:
             product.price = float(price)
-        if quantity:
+        if quantity != product.quantity:
             product.quantity = int(quantity)
-        if img_url:
+        if img_url != product.img_url:
             product.img_url = img_url
-        if category:
+        if category != product.category_id:
             product.category_id = int(category)
-        if supplier:
+        if supplier != product.supplier_id:
             product.supplier_id = int(supplier)
 
         try:
@@ -401,13 +401,13 @@ def update_supplier(supplier_id):
         phone = request.form.get('phone', '').strip()
         email= request.form.get('email', '').strip()
 
-        if name:
+        if name != supplier.name:
             supplier.name = name
-        if address:
+        if address != supplier.address:
             supplier.address = address
-        if phone:
+        if phone  != supplier.phone:
             supplier.phone = phone  
-        if email:
+        if email != supplier.email:
             supplier.email = email
         
         try:

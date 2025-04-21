@@ -89,8 +89,24 @@
       transform: translate(-50%, -50%);
     }
   </style>
+
+<link rel="stylesheet" href="/static/css/style.css">
+
 </head>
 <body>
+  <div class="container">
+    <nav>
+      <ul class="nav-list">
+          <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+          <li><a href="/user" >Users</a></li>
+          <li><a href="/product" style="color: white;">Products</a></li>
+          <li><a href="/orders">Orders</a></li>
+          <li><a href="/supplier">Supplier</a></li>
+          <li><a href="/logout">Logout</a></li>
+      </ul>
+    </nav>
+  </div>
+
   <div class="new-user">
     <h2>Create New Product</h2>
     <form action="/product/new-product" method="post">
