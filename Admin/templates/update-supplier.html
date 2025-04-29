@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>New User</title>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f0f2f5;
@@ -15,19 +19,22 @@
       justify-content: center;
       align-items: center;
     }
+
     .new-user {
       background: white;
       padding: 40px;
       border-radius: 10px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
       width: 60%;
-      
+
     }
+
     .new-user h2 {
       margin-bottom: 20px;
       text-align: center;
       color: #333;
     }
+
     .new-user input {
       width: 100%;
       padding: 10px;
@@ -35,8 +42,9 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
+
     .new-user button {
-    
+
       padding: 12px;
       background: #007bff;
       border: none;
@@ -46,34 +54,39 @@
       cursor: pointer;
       transition: background 0.3s ease;
     }
+
     .new-user button:hover {
       background: #0056b3;
     }
+
     .message {
       margin-top: 10px;
       text-align: center;
       color: red;
     }
-    .new-user div{
-        display: flex;
-        
-        align-items: center;
+
+    .new-user div {
+      display: flex;
+
+      align-items: center;
     }
+
     .cancel {
-        background-color: red;
-        border-radius: 5px;
-        border: none;
-        margin-left: 15px;
-        display: inline-block;
-        color: white;
-        padding: 10px;
-        cursor: pointer;
-        text-decoration: none;
+      background-color: red;
+      border-radius: 5px;
+      border: none;
+      margin-left: 15px;
+      display: inline-block;
+      color: white;
+      padding: 10px;
+      cursor: pointer;
+      text-decoration: none;
     }
 
     .cancel:hover {
-        background-color: darkred;
+      background-color: darkred;
     }
+
     .new-user {
       position: fixed;
       top: 50%;
@@ -81,37 +94,59 @@
       transform: translate(-50%, -50%);
     }
   </style>
-<link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/style.css">
 
 </head>
+
 <body>
   <div class="container">
     <p class="user_name">{{current_user.full_name}}</p>
 
+    {% if current_user.role == 'admin'%}
     <nav>
       <ul class="nav-list">
-          <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
-          <li><a href="/user">Users</a></li>
-          <li><a href="/product">Products</a></li>
-          <li><a href="/orders">Orders</a></li>
-          <li><a href="/supplier" style="color: white;">Supplier</a></li>
-          <li><a href="/logout">Logout</a></li>
+        <li style="color: white;"><a href="/admin" style="color: white;">
+            <h2>ADMIN</h2>
+          </a></li>
+        <li><a href="/user">Users</a></li>
+        <li><a href="/product">Products</a></li>
+        <li><a href="/orders">Orders</a></li>
+        <li><a href="/supplier" style="color: white;">Supplier</a></li>
+        <li><a href="/goods-receipt">Goods Receipts</a></li>
+
+        <li><a href="/logout">Logout</a></li>
       </ul>
     </nav>
+    {% elif current_user.role == 'warehouse_manager' %}
+    <nav>
+      <ul class="nav-list">
+        <li style="color: white;"><a href="/admin" style="color: white;">
+            <h2>ADMIN</h2>
+          </a></li>
+
+        <li><a href="/product">Products</a></li>
+        <li><a href="/supplier" style="color: white;">Supplier</a></li>
+        <li><a href="/goods-receipt">Goods Receipts</a></li>
+
+        <li><a href="/logout">Logout</a></li>
+      </ul>
+    </nav>
+    {% endif %}
   </div>
   <div class="new-user">
     <h2>Update Supplier</h2>
     <form action="#" method="post">
-        <input type="text" id="name" name="name" value="{{supplier.name}}" />
-        <input type="text" id="phone" name="phone" value="{{supplier.phone}}" />
-        <input type="email" id="email" name="email" value="{{supplier.email}}" />
-        <input type="text" id="address" name="address" value="{{supplier.address}}" />
-        <div>
-            <button type="submit">Save</button>
-            <a class="cancel" href="/supplier">Cancel</a>
-        </div>
+      <input type="text" id="name" name="name" value="{{supplier.name}}" />
+      <input type="text" id="phone" name="phone" value="{{supplier.phone}}" />
+      <input type="email" id="email" name="email" value="{{supplier.email}}" />
+      <input type="text" id="address" name="address" value="{{supplier.address}}" />
+      <div>
+        <button type="submit">Save</button>
+        <a class="cancel" href="/supplier">Cancel</a>
+      </div>
     </form>
 
   </div>
 </body>
+
 </html>

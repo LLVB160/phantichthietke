@@ -9,6 +9,13 @@ from sqlalchemy.orm import Session
 from flask_login import LoginManager, login_required, UserMixin
 from flask_login import login_user, logout_user, current_user
 
+import calendar
+from datetime import datetime
+
+import pandas as pd
+from flask import send_file
+import io
+
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -40,6 +47,8 @@ with app.app_context():
     Suppliers = Base.classes.suppliers
     Orders = Base.classes.orders
     OrderDetails = Base.classes.order_details
+    Goods_Receipt = Base.classes.import_receipts
+    Goods_Receipt_Details = Base.classes.import_receipt_details
 
 
 
@@ -492,18 +501,79 @@ from sqlalchemy import func
     
 from sqlalchemy import extract
 
+# @app.route('/order/stats', methods=['GET', 'POST'])
+# @login_required
+# def order_stats():
+#     selected_month = None
+#     month = None
+#     year = None
+
+#     if request.method == 'POST':
+#         selected_month = request.form.get('month')  # Ví dụ: '2024-04'
+#         if selected_month:
+#             year, month = map(int, selected_month.split('-'))
+
+#     query = db.session.query(
+#         Products.product_id,
+#         Products.name,
+#         func.sum(OrderDetails.quantity).label('quantity'),
+#         func.sum(OrderDetails.quantity * OrderDetails.price).label('total')
+#     )\
+#     .join(OrderDetails, Products.product_id == OrderDetails.product_id)\
+#     .join(Orders, Orders.order_id == OrderDetails.order_id)
+
+#     if year and month:
+#         query = query.filter(
+#             extract('year', Orders.order_date) == year,
+#             extract('month', Orders.order_date) == month
+#         )
+
+#     product_revenue = query.group_by(Products.product_id, Products.name).all()
+
+#     # Tổng doanh thu
+#     total_query = db.session.query(
+#         func.sum(OrderDetails.quantity * OrderDetails.price)
+#     )\
+#     .join(Orders, Orders.order_id == OrderDetails.order_id)
+
+#     if year and month:
+#         total_query = total_query.filter(
+#             extract('year', Orders.order_date) == year,
+#             extract('month', Orders.order_date) == month
+#         )
+
+#     total_revenue = total_query.scalar() or 0
+
+#     return render_template('order-stats.html', 
+#                            product_revenue=product_revenue, 
+#                            total_revenue=total_revenue,
+#                            selected_month=selected_month)
+
 @app.route('/order/stats', methods=['GET', 'POST'])
 @login_required
 def order_stats():
-    selected_month = None
-    month = None
-    year = None
+    selected_from_month = None
+    selected_to_month = None
+    start_date = None
+    end_date = None
 
     if request.method == 'POST':
-        selected_month = request.form.get('month')  # Ví dụ: '2024-04'
-        if selected_month:
-            year, month = map(int, selected_month.split('-'))
+        selected_from_month = request.form.get('from_month')  # Ví dụ: '2024-03'
+        selected_to_month = request.form.get('to_month')      # Ví dụ: '2024-04'
 
+        if selected_from_month and selected_to_month:
+            # Chuyển từ chuỗi 'YYYY-MM' sang datetime đầu tháng
+            from_year, from_month = map(int, selected_from_month.split('-'))
+            to_year, to_month = map(int, selected_to_month.split('-'))
+
+            # Ngày bắt đầu: 01 của tháng bắt đầu
+            start_date = datetime(from_year, from_month, 1)
+
+            # Ngày kết thúc: ngày cuối tháng của tháng kết thúc
+            last_day = calendar.monthrange(to_year, to_month)[1]
+            end_date = datetime(to_year, to_month, last_day)
+
+    # Query thống kê theo khoảng ngày
     query = db.session.query(
         Products.product_id,
         Products.name,
@@ -513,36 +583,32 @@ def order_stats():
     .join(OrderDetails, Products.product_id == OrderDetails.product_id)\
     .join(Orders, Orders.order_id == OrderDetails.order_id)
 
-    if year and month:
-        query = query.filter(
-            extract('year', Orders.order_date) == year,
-            extract('month', Orders.order_date) == month
-        )
+    if start_date and end_date:
+        query = query.filter(Orders.order_date >= start_date,
+                             Orders.order_date <= end_date)
 
     product_revenue = query.group_by(Products.product_id, Products.name).all()
 
     # Tổng doanh thu
     total_query = db.session.query(
         func.sum(OrderDetails.quantity * OrderDetails.price)
-    )\
-    .join(Orders, Orders.order_id == OrderDetails.order_id)
+    ).join(Orders, Orders.order_id == OrderDetails.order_id)
 
-    if year and month:
-        total_query = total_query.filter(
-            extract('year', Orders.order_date) == year,
-            extract('month', Orders.order_date) == month
-        )
+    if start_date and end_date:
+        total_query = total_query.filter(Orders.order_date >= start_date,
+                                         Orders.order_date <= end_date)
 
     total_revenue = total_query.scalar() or 0
 
-    return render_template('order-stats.html', 
-                           product_revenue=product_revenue, 
-                           total_revenue=total_revenue,
-                           selected_month=selected_month)
+    return render_template(
+        'order-stats.html',
+        product_revenue=product_revenue,
+        total_revenue=total_revenue,
+        selected_from_month=selected_from_month,
+        selected_to_month=selected_to_month
+    )
 
-import pandas as pd
-from flask import send_file
-import io
+
 
 @app.route('/orders/export')
 @login_required
@@ -594,6 +660,159 @@ def export_order_details():
 
 
 
-#______________________________________________________________________ END ORDERS
+@app.route('/goods-receipt', methods=['GET', 'POST'])
+@login_required
+def receiptManager():
+    message = request.args.get('message') 
+    query = db.session.query(
+    Goods_Receipt,
+    func.coalesce(func.sum(Goods_Receipt_Details.price * Goods_Receipt_Details.quantity), 0).label('total_amount')
+    ).outerjoin(Goods_Receipt_Details, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)\
+    .group_by(Goods_Receipt.receipt_id)
+
+    receipts = query.order_by(Goods_Receipt.receipt_id.asc()).all()
+
+    return render_template('receipt.html', receipts=receipts, message=message)
+
+
+@app.route('/goods-receipt/new-goods-receipt', methods=['GET', 'POST'])
+@login_required
+def newReceipt():
+
+    suppliers = db.session.query(Suppliers.supplier_id, Suppliers.name).all()
+
+    if request.method == 'POST':
+        note = request.form.get('note', '').strip()
+        supplier= request.form.get('supplier', '').strip()
+
+        try:
+            new_receipt = Goods_Receipt(
+                note = note,
+                supplier_id=int(supplier)
+            )
+            db.session.add(new_receipt)
+            db.session.commit()
+        
+            return redirect(url_for('receiptManager', message='Thêm hóa đơn thành công!'))
+        except Exception as e:
+            db.session.rollback() 
+            return redirect(url_for('receiptManager', message='Lỗi!'))
+        
+    return render_template('new-receipt.html', suppliers=suppliers)
+
+@app.route('/goods-receipt/new-goods-receipt-detail', methods=['GET', 'POST'])
+@login_required
+def newReceiptDetail():
+
+
+    products = db.session.query(Products.name, Products.product_id).all()
+    receipts = db.session.query(Goods_Receipt).all()
+
+    if request.method == 'POST':
+        product = request.form.get('product')
+        receipt= request.form.get('receipt', '').strip()
+        quantity = request.form.get('quantity', '').strip()
+        price = request.form.get('price', '').strip()
+
+        try:
+            new_receipt_detail = Goods_Receipt_Details(
+                product_id=int(product),
+                receipt_id=int(receipt),
+                quantity=int(quantity),
+                price=float(price)
+            )
+            db.session.add(new_receipt_detail)
+            db.session.commit()
+
+            updateQuantityProduct(product, int(quantity))
+
+        
+            return redirect(url_for('receiptManager', message='Thêm chi tiết đơn nhập hàng thành công!'))
+        except Exception as e:
+            db.session.rollback() 
+            print(e)
+            return redirect(url_for('receiptManager', message='Lỗi!'))
+        
+
+    return render_template('new-receipt-detail.html', products = products, receipts=receipts)
+
+@app.route('/api/products-by-receipt/<int:receipt_id>')
+@login_required
+def getProductsByReceipt(receipt_id):
+    receipt = db.session.query(Goods_Receipt).get(receipt_id)
+    if not receipt:
+        return jsonify([])
+
+    supplier_id = receipt.supplier_id
+    products = db.session.query(Products).filter_by(supplier_id=supplier_id).all()
+    
+    # Trả về JSON danh sách sản phẩm
+    product_list = [{"product_id": p.product_id, "name": p.name} for p in products]
+    return jsonify(product_list)
+
+
+def updateQuantityProduct( product_id, quantity):    
+    product = db.session.query(Products).get(product_id)
+    if product:
+        product.quantity += quantity
+        db.session.commit()
+
+
+@app.route('/goods-receipt-detail/<int:receipt_id>', methods=['GET', 'POST'])
+@login_required
+
+def receiptDetailByID(receipt_id):
+    details = db.session.query(Goods_Receipt_Details, Products)\
+        .join(Products, Goods_Receipt_Details.product_id == Products.product_id)\
+        .filter(Goods_Receipt_Details.receipt_id == receipt_id).all()
+
+    return render_template('receipt-detail.html', details=details)
+
+
+@app.route('/receipts/export')
+@login_required
+def export_receipt_details():
+    # Truy vấn dữ liệu kết hợp các bảng
+    query = db.session.query(
+        Goods_Receipt_Details.receipt_id,
+        Products.name.label('product_name'),
+        Goods_Receipt_Details.quantity,
+        Goods_Receipt_Details.price,
+        Goods_Receipt.import_date.label('Date')
+    )\
+    .join(Products, Goods_Receipt_Details.product_id == Products.product_id)\
+    .join(Goods_Receipt, Goods_Receipt_Details.receipt_id == Goods_Receipt.receipt_id)\
+    .order_by(Goods_Receipt_Details.receipt_id.asc())
+
+    data = query.all()
+
+    # Tạo danh sách dict
+    result = []
+    for row in data:
+        result.append({
+            'Receipt ID': row.receipt_id,
+            'Product Name': row.product_name,
+            'Quantity': row.quantity,
+            'Price': row.price,
+            'Total': row.quantity * row.price,
+            'Date': row.Date
+        })
+
+    # Chuyển sang DataFrame rồi export Excel
+    df = pd.DataFrame(result)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Import Receipts')
+
+    output.seek(0)
+
+    return send_file(output,
+                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                     download_name='import_receipts.xlsx',
+                     as_attachment=True)
+
+
+
+    
 if __name__ == '__main__':
     app.run(debug=True)

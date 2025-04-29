@@ -20,6 +20,8 @@
                 <li><a href="/product">Products</a></li>
                 <li><a style="color: white" href="/orders">Orders</a></li>
                 <li><a href="/supplier" >Suppliers</a></li>
+                <li><a href="/goods-receipt">Goods Receipts</a></li>
+
                 <li><a href="/logout">Logout</a></li>
             </ul>
         </nav>
@@ -41,8 +43,9 @@
                 <button type="submit">Search</button>
             </form> -->
             <form action="/order/stats" method="post">
-                <input type="month" id="month" name="month" value="{{ selected_month }}">
-                <button type="submit">Search</button>
+                <input type="month" id="from_month" name="from_month" value="{{ selected_from_month }}">
+                <input type="month" id="to_month" name="to_month" value="{{ selected_to_month }}">
+                <button type="submit" style="padding: 10px 20px">Stats</button>
             </form>
         </div>
         <table>
@@ -60,13 +63,13 @@
                     <td>{{ p.product_id }}</td>
                     <td>{{ p.name }}</td>
                     <td>{{ p.quantity }}</td> 
-                    <td>${{ "{:,.2f}".format(p.total) }}</td>
+                    <td>{{ "{:,.1f}".format(p.total) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         
-        <div class="total"><p><strong>Total {% if selected_month %} in {{ selected_month }}{% endif %}:</strong> ${{ "{:,.2f}".format(total_revenue) }}</p></div>
+        <div class="total"><p><strong>Total {% if selected_month %} in {{ selected_month }}{% endif %}:</strong> {{ "{:,.2f}".format(total_revenue) }}</p></div>
 
 
     </div>

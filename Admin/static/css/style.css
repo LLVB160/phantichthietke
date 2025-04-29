@@ -77,7 +77,21 @@ tr td i {
     cursor: pointer;
     text-decoration: none;
 }
+.createBtn {
+    /* color:rgb(38, 136, 249); */
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    /* background-color: rgb(15, 188, 90); */
+    background-color: rgb(11, 116, 237);
 
+    
+    /* background-color: rgb(38, 136, 249); */
+    /* border : 1px solid rgb(38, 136, 249); */
+    border : none;
+    cursor: pointer;
+    text-decoration: none;
+}
 .btn {
     color:rgb(38, 136, 249);
     padding: 10px;

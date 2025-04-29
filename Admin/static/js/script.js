@@ -31,3 +31,23 @@ selects.forEach(select => {
         });
     });
 });
+
+document.getElementById('receipt').addEventListener('change', function () {
+    const receiptId = this.value;
+
+    if (receiptId) {
+        fetch(`/api/products-by-receipt/${receiptId}`)
+            .then(res => res.json())
+            .then(data => {
+                const productSelect = document.getElementById('product');
+                productSelect.innerHTML = '<option value="">Product</option>'; 
+
+                data.forEach(product => {
+                    const opt = document.createElement('option');
+                    opt.value = product.product_id;
+                    opt.textContent = product.name;
+                    productSelect.appendChild(opt);
+                });
+            });
+    }
+});
