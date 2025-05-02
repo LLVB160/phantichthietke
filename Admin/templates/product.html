@@ -21,13 +21,13 @@
                         <h2>ADMIN</h2>
                     </a></li>
                 <li><a href="/user">Users</a></li>
-                <li><a href="/product" style="color: white">Products</a></li>
-                <li><a href="/orders">Orders</a></li>
-                <li><a href="/supplier">Suppliers</a></li>
-                <li><a href="/goods-receipt">Goods Receipts</a></li>
+                <li><a href="/product" style="color: white">Sản Phẩm</a></li>
+                <li><a href="/orders">Đơn Hàng</a></li>
+                <li><a href="/supplier">Nhà Cung Cấp</a></li>
+                <li><a href="/goods-receipt">Đơn Nhập Hàng</a></li>
 
 
-                <li><a href="/logout">Logout</a></li>
+                <li><a href="/logout">Đăng Xuất</a></li>
             </ul>
         </nav>
         {% elif current_user.role == 'warehouse_manager' %}
@@ -36,11 +36,11 @@
                 <li><a href="/admin" style="color: white;">
                         <h2>ADMIN</h2>
                     </a></li>
-                <li><a href="/product" style="color: white">Products</a></li>
-                <li><a href="/supplier">Suppliers</a></li>
-                <li><a href="/goods-receipt">Goods Receipts</a></li>
+                <li><a href="/product" style="color: white">Sản Phẩm</a></li>
+                <li><a href="/supplier">Nhà Cung Cấp</a></li>
+                <li><a href="/goods-receipt">Đơn Nhập Hàng</a></li>
 
-                <li><a href="/logout">Logout</a></li>
+                <li><a href="/logout">Đăng Xuất</a></li>
             </ul>
         </nav>
         {% endif %}
@@ -107,7 +107,7 @@
                     <td>{{ product.product_id }}</td>
                     <td>{{ product.name }}</td>
                     <td>{{ product.description }}</td>
-                    <td>{{ product.price }}</td>
+                    <td>{{ "{:,.0f}".format(product.price) }}</td>
                     <td>{{ product.quantity }}</td>
                     <td>{{ product.img_url }}</td>
                     <td>{{ product.category_id }}</td>

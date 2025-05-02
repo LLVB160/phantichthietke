@@ -15,7 +15,8 @@ from datetime import datetime
 import pandas as pd
 from flask import send_file
 import io
-
+from io import BytesIO
+#pip install XlsxWriter
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -68,7 +69,7 @@ class User(UserMixin):
 
 @login.user_loader
 def user_loader(user_id):
-    user_obj = db_session.query(Users).get(user_id)
+    user_obj = db.session.query(Users).get(user_id)
     if user_obj:
         return User(user_obj)
     return None
@@ -85,7 +86,7 @@ def user_login():
         # hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
 
         if username and password:
-            user_obj = db_session.query(Users).filter_by(username=username, password=password).first()
+            user_obj = db.session.query(Users).filter_by(username=username, password=password).first()
             if user_obj and user_obj.role in ['admin', 'employee', 'warehouse_manager']:
                 user = User(user_obj)
                 login_user(user)
@@ -210,27 +211,6 @@ def delete_user(user_id):
         return redirect(url_for('AdminUserManager', message="Lỗi khi xóa!"))
 
 #______________________________________________________________________ products
-# @app.route('/product', methods=['GET'])
-# def productManager():
-#     sort_key = request.args.get('sort', '')
-#     search = request.args.get('search', '')
-#     message = request.args.get('message')
-
-#     query = db.session.query(Products)
-
-#     # Lọc theo tên nếu có search
-#     if search:
-#         query = query.filter(Products.name.ilike(f"%{search}%"))
-
-#     # Sắp xếp theo cột được chọn
-#     if sort_key == 'name':
-#         query = query.order_by(Products.name.asc())
-#     elif sort_key == 'supplier_id':
-#         query = query.order_by(Products.supplier_id.asc())  
-
-#     products = query.all()
-
-#     return render_template('product.html', products=products, message=message)
 
 @app.route('/product', methods=['GET'])
 @login_required
@@ -501,53 +481,6 @@ from sqlalchemy import func
     
 from sqlalchemy import extract
 
-# @app.route('/order/stats', methods=['GET', 'POST'])
-# @login_required
-# def order_stats():
-#     selected_month = None
-#     month = None
-#     year = None
-
-#     if request.method == 'POST':
-#         selected_month = request.form.get('month')  # Ví dụ: '2024-04'
-#         if selected_month:
-#             year, month = map(int, selected_month.split('-'))
-
-#     query = db.session.query(
-#         Products.product_id,
-#         Products.name,
-#         func.sum(OrderDetails.quantity).label('quantity'),
-#         func.sum(OrderDetails.quantity * OrderDetails.price).label('total')
-#     )\
-#     .join(OrderDetails, Products.product_id == OrderDetails.product_id)\
-#     .join(Orders, Orders.order_id == OrderDetails.order_id)
-
-#     if year and month:
-#         query = query.filter(
-#             extract('year', Orders.order_date) == year,
-#             extract('month', Orders.order_date) == month
-#         )
-
-#     product_revenue = query.group_by(Products.product_id, Products.name).all()
-
-#     # Tổng doanh thu
-#     total_query = db.session.query(
-#         func.sum(OrderDetails.quantity * OrderDetails.price)
-#     )\
-#     .join(Orders, Orders.order_id == OrderDetails.order_id)
-
-#     if year and month:
-#         total_query = total_query.filter(
-#             extract('year', Orders.order_date) == year,
-#             extract('month', Orders.order_date) == month
-#         )
-
-#     total_revenue = total_query.scalar() or 0
-
-#     return render_template('order-stats.html', 
-#                            product_revenue=product_revenue, 
-#                            total_revenue=total_revenue,
-#                            selected_month=selected_month)
 
 @app.route('/order/stats', methods=['GET', 'POST'])
 @login_required
@@ -610,55 +543,58 @@ def order_stats():
 
 
 
-@app.route('/orders/export')
+@app.route('/order/stats/export', methods=['POST'])
 @login_required
-def export_order_details():
-    # Query join các bảng cần thiết
+def export_order_stats_excel():
+    from_month = request.form.get('from_month')
+    to_month = request.form.get('to_month')
+
+    if not from_month or not to_month:
+        return redirect(url_for('order_stats'))
+
+    from_year, from_m = map(int, from_month.split('-'))
+    to_year, to_m = map(int, to_month.split('-'))
+
+    start_date = datetime(from_year, from_m, 1)
+    end_date = datetime(to_year, to_m, calendar.monthrange(to_year, to_m)[1])
+
+    # Truy vấn dữ liệu thống kê
     query = db.session.query(
-        Orders.order_id,
-        Products.name.label('product_name'),
-        OrderDetails.quantity,
-        OrderDetails.price,
-        Users.full_name,
-        Users.phone,
-        Users.address,
-        Orders.status
+        Products.product_id.label('Product ID'),
+        Products.name.label('Product Name'),
+        func.sum(OrderDetails.quantity).label('Quantity'),
+        func.sum(OrderDetails.quantity * OrderDetails.price).label('Total Price')
     )\
-    .join(OrderDetails, Orders.order_id == OrderDetails.order_id)\
-    .join(Products, Products.product_id == OrderDetails.product_id)\
-    .join(Users, Orders.user_id == Users.user_id)\
-    .order_by(Orders.order_id.asc())
+    .join(OrderDetails, Products.product_id == OrderDetails.product_id)\
+    .join(Orders, Orders.order_id == OrderDetails.order_id)\
+    .filter(Orders.order_date >= start_date, Orders.order_date <= end_date)\
+    .group_by(Products.product_id, Products.name).all()
 
-    data = query.all()
+    df = pd.DataFrame(query, columns=['Product ID', 'Product Name', 'Quantity', 'Total Price'])
 
-    result = []
-    for row in data:
-        result.append({
-            'Order ID': row.order_id,
-            'Product Name': row.product_name,
-            'Quantity': row.quantity,
-            'Price': row.price,
-            'Total': row.quantity * row.price,
-            'Full Name': row.full_name,
-            'Phone': row.phone,
-            'Address': row.address,
-            'Status': row.status
-        })
-
-    # Chuyển sang DataFrame rồi export Excel
-    df = pd.DataFrame(result)
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Order Details')
-
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Order Stats', index=False)
     output.seek(0)
 
+    filename = f'stats_order_{from_month}_to_{to_month}.xlsx'
     return send_file(output,
-                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                     download_name='order_details.xlsx',
-                     as_attachment=True)
+                     download_name=filename,
+                     as_attachment=True,
+                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+@app.route('/order-detail/<int:order_id>', methods=['GET', 'POST'])
+@login_required
+def orderDetailByID(order_id):
+    details = db.session.query(OrderDetails, Products, Suppliers)\
+        .join(Products, OrderDetails.product_id == Products.product_id)\
+        .join(Suppliers, Products.supplier_id == Suppliers.supplier_id)\
+        .filter(OrderDetails.order_id == order_id).all()
+
+    return render_template('order-detail.html', details=details)
 
 
+#__________________________________________________________________________________ end order
 
 @app.route('/goods-receipt', methods=['GET', 'POST'])
 @login_required
@@ -769,50 +705,113 @@ def receiptDetailByID(receipt_id):
     return render_template('receipt-detail.html', details=details)
 
 
-@app.route('/receipts/export')
+
+@app.route('/goods-receipt/stats', methods=['GET', 'POST'])
 @login_required
-def export_receipt_details():
-    # Truy vấn dữ liệu kết hợp các bảng
+def goods_receipt_stats():
+    selected_from_month = None
+    selected_to_month = None
+    start_date = None
+    end_date = None
+
+    if request.method == 'POST':
+        selected_from_month = request.form.get('from_month')  # Ví dụ: '2024-03'
+        selected_to_month = request.form.get('to_month')      # Ví dụ: '2024-04'
+
+        if selected_from_month and selected_to_month:
+            # Chuyển đổi từ chuỗi 'YYYY-MM' sang datetime đầu tháng
+            from_year, from_month = map(int, selected_from_month.split('-'))
+            to_year, to_month = map(int, selected_to_month.split('-'))
+
+            # Ngày bắt đầu: ngày 01 của tháng bắt đầu
+            start_date = datetime(from_year, from_month, 1)
+
+            # Ngày kết thúc: ngày cuối tháng của tháng kết thúc
+            last_day = calendar.monthrange(to_year, to_month)[1]
+            end_date = datetime(to_year, to_month, last_day)
+
+    # Truy vấn tổng số lượng nhập và tổng giá trị nhập của từng sản phẩm
     query = db.session.query(
-        Goods_Receipt_Details.receipt_id,
+        Products.product_id,
         Products.name.label('product_name'),
-        Goods_Receipt_Details.quantity,
-        Goods_Receipt_Details.price,
-        Goods_Receipt.import_date.label('Date')
+        Suppliers.name.label('supplier_name'),
+        func.sum(Goods_Receipt_Details.quantity).label('total_quantity'),
+        func.sum(Goods_Receipt_Details.quantity * Goods_Receipt_Details.price).label('total_price')
     )\
-    .join(Products, Goods_Receipt_Details.product_id == Products.product_id)\
-    .join(Goods_Receipt, Goods_Receipt_Details.receipt_id == Goods_Receipt.receipt_id)\
-    .order_by(Goods_Receipt_Details.receipt_id.asc())
+    .join(Goods_Receipt_Details, Products.product_id == Goods_Receipt_Details.product_id)\
+    .join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)\
+    .join(Suppliers, Suppliers.supplier_id == Products.supplier_id)
 
-    data = query.all()
+    # Lọc theo khoảng thời gian nếu có
+    if start_date and end_date:
+        query = query.filter(Goods_Receipt.import_date >= start_date,
+                             Goods_Receipt.import_date <= end_date)
 
-    # Tạo danh sách dict
-    result = []
-    for row in data:
-        result.append({
-            'Receipt ID': row.receipt_id,
-            'Product Name': row.product_name,
-            'Quantity': row.quantity,
-            'Price': row.price,
-            'Total': row.quantity * row.price,
-            'Date': row.Date
-        })
+    # Nhóm theo sản phẩm và nhà cung cấp
+    product_import_stats = query.group_by(Products.product_id, Products.name, Suppliers.name).all()
 
-    # Chuyển sang DataFrame rồi export Excel
-    df = pd.DataFrame(result)
-    output = io.BytesIO()
+    # Tổng chi phí nhập hàng
+    total_query = db.session.query(
+        func.sum(Goods_Receipt_Details.quantity * Goods_Receipt_Details.price)
+    ).join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)
+
+    if start_date and end_date:
+        total_query = total_query.filter(Goods_Receipt.import_date >= start_date,
+                                         Goods_Receipt.import_date <= end_date)
+
+    total_import_cost = total_query.scalar() or 0
+
+    return render_template(
+        'receipt-stats.html',
+        product_import_stats=product_import_stats,
+        total_import_cost=total_import_cost,
+        selected_from_month=selected_from_month,
+        selected_to_month=selected_to_month
+    )
+
+
+
+
+@app.route('/goods-receipt/export', methods=['POST'])
+@login_required
+def export_goods_receipt_excel():
+    from_month = request.form.get('from_month')
+    to_month = request.form.get('to_month')
+
+    if not from_month or not to_month:
+        return redirect(url_for('goods_receipt_stats'))
+
+    from_year, from_m = map(int, from_month.split('-'))
+    to_year, to_m = map(int, to_month.split('-'))
+
+    start_date = datetime(from_year, from_m, 1)
+    end_date = datetime(to_year, to_m, calendar.monthrange(to_year, to_m)[1])
+
+    # Truy vấn dữ liệu như ở hàm thống kê
+    query = db.session.query(
+        Products.name.label('Product Name'),
+        Suppliers.name.label('Supplier Name'),
+        func.sum(Goods_Receipt_Details.quantity).label('Quantity'),
+        func.sum(Goods_Receipt_Details.quantity * Goods_Receipt_Details.price).label('Total Price')
+    )\
+    .join(Goods_Receipt_Details, Products.product_id == Goods_Receipt_Details.product_id)\
+    .join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)\
+    .join(Suppliers, Suppliers.supplier_id == Products.supplier_id)\
+    .filter(Goods_Receipt.import_date >= start_date, Goods_Receipt.import_date <= end_date)\
+    .group_by(Products.name, Suppliers.name).all()
+
+    # Tạo DataFrame
+    df = pd.DataFrame(query, columns=['Product Name', 'Supplier Name', 'Quantity', 'Total Price'])
+
+    # Xuất ra Excel
+    output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Import Receipts')
-
+        df.to_excel(writer, index=False, sheet_name='Thống kê nhập hàng')
     output.seek(0)
 
-    return send_file(output,
-                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                     download_name='import_receipts.xlsx',
-                     as_attachment=True)
+    filename = f'stats_{from_month}_to_{to_month}.xlsx'
+    return send_file(output, download_name=filename, as_attachment=True)
 
 
-
-    
 if __name__ == '__main__':
     app.run(debug=True)

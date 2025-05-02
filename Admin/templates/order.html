@@ -17,20 +17,20 @@
             <ul class="nav-list">
                 <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
                 <li><a href="/user">Users</a></li>
-                <li><a href="/product">Products</a></li>
-                <li><a style="color: white" href="/orders">Orders</a></li>
-                <li><a href="/supplier" >Suppliers</a></li>
-                <li><a href="/goods-receipt">Goods Receipts</a></li>
+                <li><a href="/product">Sản Phẩm</a></li>
+                <li><a style="color: white" href="/orders">Đơn Hàng</a></li>
+                <li><a href="/supplier" >Nhà Cung Cấp</a></li>
+                <li><a href="/goods-receipt">Đơn Nhập Hàng</a></li>
 
-                <li><a href="/logout">Logout</a></li>
+                <li><a href="/logout">Đăng Xuất</a></li>
             </ul>
         </nav>
         {% elif current_user.role == 'employee' %}
         <nav>
             <ul class="nav-list">
                 <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
-                <li><a style="color: white" href="/orders">Orders</a></li>
-                <li><a href="/logout">Logout</a></li>
+                <li><a style="color: white" href="/orders">Đơn Hàng</a></li>
+                <li><a href="/logout">Đăng Xuất</a></li>
             </ul>
         </nav>
         {% endif %}
@@ -40,7 +40,6 @@
         {% endif %}
         <div class="toolbar" style="margin-top: 20px;">
             <a href="/order/stats" id="createBtn">Stats</a>
-            <a href="/orders/export" class="export-btn">Export</a>
             <form action="#" method="post">
                 <input type="date" name="start_date" placeholder="Start Date" required>
                 <input type="date" name="end_date" placeholder="End Date" required>
@@ -53,8 +52,9 @@
         <table>
             <thead>
                 <tr>
+                    <td></td>
                     <th>Order ID</th>
-                    <th>User ID</th>
+
                     <th>Full name</th>
                     <th>Phone</th>
                     <th>Address</th>
@@ -66,13 +66,14 @@
             <tbody>
                 {% for o, u in orders %}
                 <tr>
+                    <td><a href="/order-detail/{{o.order_id}}"><i class="fa-solid fa-eye"></i></a></td>
+
                     <td>{{o.order_id}}</td>
-                    <td>{{u.user_id}}</td>
                     <td>{{u.full_name}}</td>   
                     <td>{{u.phone}}</td>
                     <td>{{u.address}}</td>
                     <td>{{o.order_date}}</td>
-                    <td>{{o.total_amount}}</td>
+                    <td>{{ "{:,.0f}".format(o.total_amount) }}</td>
                     <td>
                         <select name="status" id="status" data-id="{{ o.order_id }}" class="status-select">
                             

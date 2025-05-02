@@ -4,20 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Order Stats</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 
 <body>
-    <div class="container" style="font-size: 15px;">
+    <div class="container">
         <p class="user_name">{{current_user.full_name}}</p>
 
         {% if current_user.role == 'admin'%}
         <nav>
             <ul class="nav-list">
-                <li><a href="/admin" style="color: white;">
+                <li style="color: white;"><a href="/admin" style="color: white;">
                         <h2>ADMIN</h2>
                     </a></li>
                 <li><a href="/user">Users</a></li>
@@ -45,55 +45,51 @@
         {% endif %}
 
 
-        {% if message %}
-        <div class="message" id="message">{{message}}</div>
-        {% endif %}
-        <div style="margin-top: 20px;" class="btn-container product-toolbar">
-            <div class="product-toolbar-left">
-                <a href="/goods-receipt/new-goods-receipt" class="createBtn">Create New Receipt</a>
-                <a href="/goods-receipt/new-goods-receipt-detail" class="createBtn">Create New Receipt Detail</a>
-                <a href="/goods-receipt/stats" id="createBtn">Stats</a>
+        <div class="toolbar" style="margin-top: 20px;">
 
-            </div>
-
-
+            <!-- <form action="#" method="post">
+                <input type="month" id="month" name="month">
+                <button type="submit">Search</button>
+            </form> -->
+            <form action="/goods-receipt/stats" method="post">
+                <input type="month" name="from_month" value="{{ selected_from_month }}">
+                <input type="month" name="to_month" value="{{ selected_to_month }}">
+                
+                <button type="submit" name="action" value="stats" style="padding: 10px 20px">Stats</button>
+                <button type="submit" formaction="{{ url_for('export_goods_receipt_excel') }}" style="padding: 10px 20px">Export</button>
+            </form>
+            
+            
         </div>
-
-
-        {% if receipts %}
         <table>
             <thead>
                 <tr>
-                    <td></td>
-                    <th>Receipt ID</th>
-                    <th>Supplier ID</th>
-                    <th>Date</th>
-                    <th>Note</th>
-                    <th>Total Price</th>
+                    <th>Product Name</th>
+                    <th>Supplier Name</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
-                {% for re, total_amount in receipts %}
-
+                {% for item in product_import_stats %}
                 <tr>
-
-                    <td><a href="/goods-receipt-detail/{{re.receipt_id}}"><i class="fa-solid fa-eye"></i></a></td>
-                    <td>{{ re.receipt_id }}</td>
-                    <td>{{ re.supplier_id }}</td>
-                    <td>{{ re.import_date }}</td>
-                    <td>{{ re.note }}</td>
-                    <td>{{ '{:,.0f}'.format(total_amount) }}</td>
-
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.supplier_name }}</td>
+                    <td>{{ item.total_quantity }}</td>
+                    <td>{{ "{:,.0f}".format(item.total_price) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        {% else %}
-        <div class="container-no-order">
-            <div class="no-order">No products found</div>
+
+        <div class="total">
+            <p><strong>Total: </strong> {{
+                "{:,.0f}".format(total_import_cost) }}</p>
         </div>
-        {% endif %}
+
+
     </div>
+    <script src="/static/js/script.js"></script>
 </body>
 
 </html>

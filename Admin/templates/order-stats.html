@@ -17,20 +17,20 @@
             <ul class="nav-list">
                 <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
                 <li><a href="/user">Users</a></li>
-                <li><a href="/product">Products</a></li>
-                <li><a style="color: white" href="/orders">Orders</a></li>
-                <li><a href="/supplier" >Suppliers</a></li>
-                <li><a href="/goods-receipt">Goods Receipts</a></li>
+                <li><a href="/product">Sản Phẩm</a></li>
+                <li><a style="color: white" href="/orders">Đơn Hàng</a></li>
+                <li><a href="/supplier">Nhà Cung Cấp</a></li>
+                <li><a href="/goods-receipt">Đơn Nhập Hàng</a></li>
 
-                <li><a href="/logout">Logout</a></li>
+                <li><a href="/logout">Đăng Xuất</a></li>
             </ul>
         </nav>
         {% elif current_user.role == 'employee' %}
         <nav>
             <ul class="nav-list">
                 <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
-                <li><a style="color: white" href="/orders">Orders</a></li>
-                <li><a href="/logout">Logout</a></li>
+                <li><a style="color: white" href="/orders">Đơn Hàng</a></li>
+                <li><a href="/logout">Đăng Xuất</a></li>
             </ul>
         </nav>
         {% endif %}
@@ -46,6 +46,8 @@
                 <input type="month" id="from_month" name="from_month" value="{{ selected_from_month }}">
                 <input type="month" id="to_month" name="to_month" value="{{ selected_to_month }}">
                 <button type="submit" style="padding: 10px 20px">Stats</button>
+                <button type="submit" style="padding: 10px 20px" formaction="{{ url_for('export_order_stats_excel') }}">Export</button>
+
             </form>
         </div>
         <table>
@@ -63,13 +65,13 @@
                     <td>{{ p.product_id }}</td>
                     <td>{{ p.name }}</td>
                     <td>{{ p.quantity }}</td> 
-                    <td>{{ "{:,.1f}".format(p.total) }}</td>
+                    <td>{{ "{:,.0f}".format(p.total) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         
-        <div class="total"><p><strong>Total {% if selected_month %} in {{ selected_month }}{% endif %}:</strong> {{ "{:,.2f}".format(total_revenue) }}</p></div>
+        <div class="total"><p><strong>Total {% if selected_month %} in {{ selected_month }}{% endif %}:</strong> {{ "{:,.0f}".format(total_revenue) }}</p></div>
 
 
     </div>

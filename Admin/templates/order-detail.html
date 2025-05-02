@@ -29,34 +29,25 @@
         {% if current_user.role == 'admin'%}
         <nav>
             <ul class="nav-list">
-                <li><a href="/admin" style="color: white;">
-                        <h2>ADMIN</h2>
-                    </a></li>
+                <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
                 <li><a href="/user">Users</a></li>
-                <li><a href="/product" >Sản Phẩm</a></li>
-                <li><a href="/orders">Đơn Hàng</a></li>
+                <li><a href="/product">Sản Phẩm</a></li>
+                <li><a style="color: white" href="/orders">Đơn Hàng</a></li>
                 <li><a href="/supplier">Nhà Cung Cấp</a></li>
-                <li><a href="/goods-receipt" style="color: white">Đơn Nhập Hàng</a></li>
+                <li><a href="/goods-receipt">Đơn Nhập Hàng</a></li>
 
                 <li><a href="/logout">Đăng Xuất</a></li>
             </ul>
         </nav>
-        {% elif current_user.role == 'warehouse_manager' %}
+        {% elif current_user.role == 'employee' %}
         <nav>
             <ul class="nav-list">
-                <li><a href="/admin" style="color: white;">
-                        <h2>ADMIN</h2>
-                    </a></li>
-                <li><a href="/product" >Sản Phẩm</a></li>
-                <li><a href="/supplier">Nhà Cung Cấp</a></li>
-                <li><a href="/goods-receipt" style="color: white">Đơn Nhập Hàng</a></li>
-
+                <li style="color: white;"><a href="/admin" style="color: white;"><h2>ADMIN</h2></a></li>
+                <li><a style="color: white" href="/orders">Đơn Hàng</a></li>
                 <li><a href="/logout">Đăng Xuất</a></li>
             </ul>
         </nav>
         {% endif %}
-
-
 
 
 
@@ -64,35 +55,32 @@
         <table>
             <thead>
                 <tr>
-                    <th>Receipt ID</th>
                     <th>Product Name</th>
                     <th>Quantity</th>
                     <th>Price</th>
+                    <th>Supplier Name</th>
                 </tr>
             </thead>
             <tbody>
-                {% for re, p in details %}
-
+                {% for detail, product, supplier in details %}
                 <tr>
-
-
-                    <td>{{ re.receipt_id }}</td>
-                    <td>{{ p.name }}</td>
-                    <td>{{ re.quantity }}</td>
-                    <td>{{ '{:,.0f}'.format(re.price) }}</td>
-
+                    <td>{{ product.name }}</td>
+                    
+                    <td>{{ detail.quantity }}</td>
+                    <td>{{ "{:,.0f}".format(detail.price) }}</td>
+                    <td>{{ supplier.name }}</td>
                 </tr>
-                {% endfor %}
+            {% endfor %}
             </tbody>
         </table>
         {% else %}
         <div class="container-no-order">
-            <div class="no-order">No Goods Receipt Detail</div>
+            <div class="no-order">No Order Details</div>
         </div>
         {% endif %}
 
         <div>
-            <a class="cancel" href="/goods-receipt">Trang chủ</a>
+            <a class="cancel" href="/orders">Trang chủ</a>
         </div>
     </div>
 </body>
