@@ -63,7 +63,7 @@
                 {% for p in product_revenue %}
                 <tr>
                     <td>{{ p.product_id }}</td>
-                    <td>{{ p.name }}</td>
+                    <td>{{ p.product_name }}</td>
                     <td>{{ p.quantity }}</td> 
                     <td>{{ "{:,.0f}".format(p.total) }}</td>
                 </tr>

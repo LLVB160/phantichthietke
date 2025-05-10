@@ -46,6 +46,7 @@
             </thead>
             <tbody>
                 {% for user in users %}
+                {% if current_user.user_id !=  user.user_id %}
                 <tr>
                     <td><a  href="/user/update-user/{{ user.user_id }}" style="text-decoration: none; color: #5bc0de;">
                             <i class="fa-solid fa-pencil" id="sua"></i>
@@ -62,6 +63,7 @@
                     <td>{{ user.email }}</td>
                     <td>{{ user.address }}</td>
                 </tr>
+                {% endif %}
                 {% endfor %}
             </tbody>
         </table>

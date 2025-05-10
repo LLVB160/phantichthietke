@@ -71,13 +71,13 @@
                 </tr>
             </thead>
             <tbody>
-                {% for re, p in details %}
+                {% for re in details %}
 
                 <tr>
 
 
                     <td>{{ re.receipt_id }}</td>
-                    <td>{{ p.name }}</td>
+                    <td>{{ re.product_name }}</td>
                     <td>{{ re.quantity }}</td>
                     <td>{{ '{:,.0f}'.format(re.price) }}</td>
 

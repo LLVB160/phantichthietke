@@ -86,7 +86,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for product, supp in products %}
+                {% for product in products %}
                 <tr>
 
                     <td>
@@ -111,7 +111,7 @@
                     <td>{{ product.quantity }}</td>
                     <td>{{ product.img_url }}</td>
                     <td>{{ product.category_id }}</td>
-                    <td>{{ supp.name }}</td>
+                    <td>{{ product.supplier }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

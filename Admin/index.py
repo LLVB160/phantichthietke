@@ -219,7 +219,7 @@ def productManager():
     search = request.args.get('search', '')
     message = request.args.get('message')
 
-    query = db.session.query(Products, Suppliers).join(Suppliers, Products.supplier_id == Suppliers.supplier_id)
+    query = db.session.query(Products)
 
     # Lọc theo tên sản phẩm hoặc tên nhà cung cấp
     if search:
@@ -231,11 +231,11 @@ def productManager():
     if sort_key == 'name':
         query = query.order_by(Products.name.asc())
     elif sort_key == 'supplier':
-        query = query.order_by(Suppliers.name.asc())
+        query = query.order_by(Products.supplier.asc())
     else:
         query = query.order_by(Products.product_id.asc())  
 
-    products = query.all()  # products = [(product, supplier), ...]
+    products = query.all() 
 
     return render_template('product.html', products=products, message=message)
 
@@ -259,6 +259,8 @@ def newProduct():
         category = request.form.get('category', '').strip()
         supplier= request.form.get('supplier', '').strip()
 
+        supplier_name = db.session.query(Suppliers).get(int(supplier))
+
         try:
             new_product = Products(
                 name=name,
@@ -267,7 +269,8 @@ def newProduct():
                 quantity=int(quantity),
                 img_url=img_url,
                 category_id=int(category),
-                supplier_id=int(supplier)
+                supplier_id=int(supplier),
+                supplier=supplier_name.name
             )
             db.session.add(new_product)
             db.session.commit()
@@ -275,6 +278,7 @@ def newProduct():
             return redirect(url_for('productManager', message='Thêm sản phẩm thành công!'))
         except Exception as e:
             db.session.rollback() 
+            # return f"Lỗi: {str(e)}"
             return redirect(url_for('productManager', message='Lỗi!'))
         
 
@@ -442,16 +446,14 @@ def orderManager():
         end_date_str = request.form.get('end_date')
 
         if start_date_str and end_date_str:
-            # Chuyển đổi từ chuỗi sang datetime
             try:
                 start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-                # Đặt end_date là cuối ngày để bao trùm toàn bộ ngày đó
                 end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
                 end_date = end_date.replace(hour=23, minute=59, second=59)
 
                 query = query.filter(Orders.order_date.between(start_date, end_date))
             except ValueError:
-                pass  # Trường hợp ngày không hợp lệ có thể xử lý thêm nếu muốn
+                pass  
 
     orders = query.order_by(Orders.order_id.asc()).all()
 
@@ -482,6 +484,60 @@ from sqlalchemy import func
 from sqlalchemy import extract
 
 
+# @app.route('/order/stats', methods=['GET', 'POST'])
+# @login_required
+# def order_stats():
+#     selected_from_month = None
+#     selected_to_month = None
+#     start_date = None
+#     end_date = None
+
+#     if request.method == 'POST':
+#         selected_from_month = request.form.get('from_month') 
+#         selected_to_month = request.form.get('to_month')     
+
+#         if selected_from_month and selected_to_month:
+#             from_year, from_month = map(int, selected_from_month.split('-'))
+#             to_year, to_month = map(int, selected_to_month.split('-'))
+
+#             start_date = datetime(from_year, from_month, 1)
+
+#             last_day = calendar.monthrange(to_year, to_month)[1]
+#             end_date = datetime(to_year, to_month, last_day)
+
+#     query = db.session.query(
+#         Products.product_id,
+#         Products.name,
+#         func.sum(OrderDetails.quantity).label('quantity'),
+#         func.sum(OrderDetails.quantity * OrderDetails.price).label('total')
+#     )\
+#     .join(OrderDetails, Products.product_id == OrderDetails.product_id)\
+#     .join(Orders, Orders.order_id == OrderDetails.order_id)
+
+#     if start_date and end_date:
+#         query = query.filter(Orders.order_date >= start_date,
+#                              Orders.order_date <= end_date)
+
+#     product_revenue = query.group_by(Products.product_id, Products.name).all()
+
+#     total_query = db.session.query(
+#         func.sum(OrderDetails.quantity * OrderDetails.price)
+#     ).join(Orders, Orders.order_id == OrderDetails.order_id)
+
+#     if start_date and end_date:
+#         total_query = total_query.filter(Orders.order_date >= start_date,
+#                                          Orders.order_date <= end_date)
+
+#     total_revenue = total_query.scalar() or 0
+
+#     return render_template(
+#         'order-stats.html',
+#         product_revenue=product_revenue,
+#         total_revenue=total_revenue,
+#         selected_from_month=selected_from_month,
+#         selected_to_month=selected_to_month
+#     )
+
 @app.route('/order/stats', methods=['GET', 'POST'])
 @login_required
 def order_stats():
@@ -491,38 +547,30 @@ def order_stats():
     end_date = None
 
     if request.method == 'POST':
-        selected_from_month = request.form.get('from_month')  # Ví dụ: '2024-03'
-        selected_to_month = request.form.get('to_month')      # Ví dụ: '2024-04'
+        selected_from_month = request.form.get('from_month') 
+        selected_to_month = request.form.get('to_month')     
 
         if selected_from_month and selected_to_month:
-            # Chuyển từ chuỗi 'YYYY-MM' sang datetime đầu tháng
             from_year, from_month = map(int, selected_from_month.split('-'))
             to_year, to_month = map(int, selected_to_month.split('-'))
 
-            # Ngày bắt đầu: 01 của tháng bắt đầu
             start_date = datetime(from_year, from_month, 1)
-
-            # Ngày kết thúc: ngày cuối tháng của tháng kết thúc
             last_day = calendar.monthrange(to_year, to_month)[1]
             end_date = datetime(to_year, to_month, last_day)
 
-    # Query thống kê theo khoảng ngày
     query = db.session.query(
-        Products.product_id,
-        Products.name,
+        OrderDetails.product_id,
+        OrderDetails.product_name,
         func.sum(OrderDetails.quantity).label('quantity'),
         func.sum(OrderDetails.quantity * OrderDetails.price).label('total')
-    )\
-    .join(OrderDetails, Products.product_id == OrderDetails.product_id)\
-    .join(Orders, Orders.order_id == OrderDetails.order_id)
+    ).join(Orders, Orders.order_id == OrderDetails.order_id)
 
     if start_date and end_date:
         query = query.filter(Orders.order_date >= start_date,
                              Orders.order_date <= end_date)
 
-    product_revenue = query.group_by(Products.product_id, Products.name).all()
+    product_revenue = query.group_by(OrderDetails.product_id, OrderDetails.product_name).all()
 
-    # Tổng doanh thu
     total_query = db.session.query(
         func.sum(OrderDetails.quantity * OrderDetails.price)
     ).join(Orders, Orders.order_id == OrderDetails.order_id)
@@ -543,6 +591,45 @@ def order_stats():
 
 
 
+# @app.route('/order/stats/export', methods=['POST'])
+# @login_required
+# def export_order_stats_excel():
+#     from_month = request.form.get('from_month')
+#     to_month = request.form.get('to_month')
+
+#     if not from_month or not to_month:
+#         return redirect(url_for('order_stats'))
+
+#     from_year, from_m = map(int, from_month.split('-'))
+#     to_year, to_m = map(int, to_month.split('-'))
+
+#     start_date = datetime(from_year, from_m, 1)
+#     end_date = datetime(to_year, to_m, calendar.monthrange(to_year, to_m)[1])
+
+#     # Truy vấn dữ liệu thống kê
+#     query = db.session.query(
+#         Products.product_id.label('Product ID'),
+#         Products.name.label('Product Name'),
+#         func.sum(OrderDetails.quantity).label('Quantity'),
+#         func.sum(OrderDetails.quantity * OrderDetails.price).label('Total Price')
+#     )\
+#     .join(OrderDetails, Products.product_id == OrderDetails.product_id)\
+#     .join(Orders, Orders.order_id == OrderDetails.order_id)\
+#     .filter(Orders.order_date >= start_date, Orders.order_date <= end_date)\
+#     .group_by(Products.product_id, Products.name).all()
+
+#     df = pd.DataFrame(query, columns=['Product ID', 'Product Name', 'Quantity', 'Total Price'])
+
+#     output = BytesIO()
+#     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+#         df.to_excel(writer, sheet_name='Order Stats', index=False)
+#     output.seek(0)
+
+#     filename = f'stats_order_{from_month}_to_{to_month}.xlsx'
+#     return send_file(output,
+#                      download_name=filename,
+#                      as_attachment=True,
+#                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 @app.route('/order/stats/export', methods=['POST'])
 @login_required
 def export_order_stats_excel():
@@ -558,17 +645,14 @@ def export_order_stats_excel():
     start_date = datetime(from_year, from_m, 1)
     end_date = datetime(to_year, to_m, calendar.monthrange(to_year, to_m)[1])
 
-    # Truy vấn dữ liệu thống kê
     query = db.session.query(
-        Products.product_id.label('Product ID'),
-        Products.name.label('Product Name'),
+        OrderDetails.product_id.label('Product ID'),
+        OrderDetails.product_name.label('Product Name'),
         func.sum(OrderDetails.quantity).label('Quantity'),
         func.sum(OrderDetails.quantity * OrderDetails.price).label('Total Price')
-    )\
-    .join(OrderDetails, Products.product_id == OrderDetails.product_id)\
-    .join(Orders, Orders.order_id == OrderDetails.order_id)\
-    .filter(Orders.order_date >= start_date, Orders.order_date <= end_date)\
-    .group_by(Products.product_id, Products.name).all()
+    ).join(Orders, Orders.order_id == OrderDetails.order_id)\
+     .filter(Orders.order_date >= start_date, Orders.order_date <= end_date)\
+     .group_by(OrderDetails.product_id, OrderDetails.product_name).all()
 
     df = pd.DataFrame(query, columns=['Product ID', 'Product Name', 'Quantity', 'Total Price'])
 
@@ -583,13 +667,11 @@ def export_order_stats_excel():
                      as_attachment=True,
                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
+
 @app.route('/order-detail/<int:order_id>', methods=['GET', 'POST'])
 @login_required
 def orderDetailByID(order_id):
-    details = db.session.query(OrderDetails, Products, Suppliers)\
-        .join(Products, OrderDetails.product_id == Products.product_id)\
-        .join(Suppliers, Products.supplier_id == Suppliers.supplier_id)\
-        .filter(OrderDetails.order_id == order_id).all()
+    details = db.session.query(OrderDetails).filter(OrderDetails.order_id == order_id).all()
 
     return render_template('order-detail.html', details=details)
 
@@ -618,13 +700,14 @@ def newReceipt():
     suppliers = db.session.query(Suppliers.supplier_id, Suppliers.name).all()
 
     if request.method == 'POST':
-        note = request.form.get('note', '').strip()
         supplier= request.form.get('supplier', '').strip()
+
+        supplier_name = db.session.query(Suppliers).get(int(supplier))
 
         try:
             new_receipt = Goods_Receipt(
-                note = note,
-                supplier_id=int(supplier)
+                supplier_id=int(supplier),
+                supplier=supplier_name.name
             )
             db.session.add(new_receipt)
             db.session.commit()
@@ -650,12 +733,16 @@ def newReceiptDetail():
         quantity = request.form.get('quantity', '').strip()
         price = request.form.get('price', '').strip()
 
+        product_name = db.session.query(Products).get(int(product))
+
+
         try:
             new_receipt_detail = Goods_Receipt_Details(
                 product_id=int(product),
                 receipt_id=int(receipt),
                 quantity=int(quantity),
-                price=float(price)
+                price=float(price),
+                product_name=product_name.name
             )
             db.session.add(new_receipt_detail)
             db.session.commit()
@@ -682,7 +769,6 @@ def getProductsByReceipt(receipt_id):
     supplier_id = receipt.supplier_id
     products = db.session.query(Products).filter_by(supplier_id=supplier_id).all()
     
-    # Trả về JSON danh sách sản phẩm
     product_list = [{"product_id": p.product_id, "name": p.name} for p in products]
     return jsonify(product_list)
 
@@ -698,13 +784,68 @@ def updateQuantityProduct( product_id, quantity):
 @login_required
 
 def receiptDetailByID(receipt_id):
-    details = db.session.query(Goods_Receipt_Details, Products)\
-        .join(Products, Goods_Receipt_Details.product_id == Products.product_id)\
-        .filter(Goods_Receipt_Details.receipt_id == receipt_id).all()
+    details = db.session.query(Goods_Receipt_Details).filter(Goods_Receipt_Details.receipt_id == receipt_id).all()
 
     return render_template('receipt-detail.html', details=details)
 
 
+
+# @app.route('/goods-receipt/stats', methods=['GET', 'POST'])
+# @login_required
+# def goods_receipt_stats():
+#     selected_from_month = None
+#     selected_to_month = None
+#     start_date = None
+#     end_date = None
+
+#     if request.method == 'POST':
+#         selected_from_month = request.form.get('from_month') 
+#         selected_to_month = request.form.get('to_month')      
+
+#         if selected_from_month and selected_to_month:
+
+#             from_year, from_month = map(int, selected_from_month.split('-'))
+#             to_year, to_month = map(int, selected_to_month.split('-'))
+
+#             start_date = datetime(from_year, from_month, 1)
+
+#             last_day = calendar.monthrange(to_year, to_month)[1]
+#             end_date = datetime(to_year, to_month, last_day)
+
+#     query = db.session.query(
+#         Products.product_id,
+#         Products.name.label('product_name'),
+#         Suppliers.name.label('supplier_name'),
+#         func.sum(Goods_Receipt_Details.quantity).label('total_quantity'),
+#         func.sum(Goods_Receipt_Details.quantity * Goods_Receipt_Details.price).label('total_price')
+#     )\
+#     .join(Goods_Receipt_Details, Products.product_id == Goods_Receipt_Details.product_id)\
+#     .join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)\
+#     .join(Suppliers, Suppliers.supplier_id == Products.supplier_id)
+
+#     if start_date and end_date:
+#         query = query.filter(Goods_Receipt.import_date >= start_date,
+#                              Goods_Receipt.import_date <= end_date)
+
+#     product_import_stats = query.group_by(Products.product_id, Products.name, Suppliers.name).all()
+
+#     total_query = db.session.query(
+#         func.sum(Goods_Receipt_Details.quantity * Goods_Receipt_Details.price)
+#     ).join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)
+
+#     if start_date and end_date:
+#         total_query = total_query.filter(Goods_Receipt.import_date >= start_date,
+#                                          Goods_Receipt.import_date <= end_date)
+
+#     total_import_cost = total_query.scalar() or 0
+
+#     return render_template(
+#         'receipt-stats.html',
+#         product_import_stats=product_import_stats,
+#         total_import_cost=total_import_cost,
+#         selected_from_month=selected_from_month,
+#         selected_to_month=selected_to_month
+#     )
 
 @app.route('/goods-receipt/stats', methods=['GET', 'POST'])
 @login_required
@@ -715,49 +856,47 @@ def goods_receipt_stats():
     end_date = None
 
     if request.method == 'POST':
-        selected_from_month = request.form.get('from_month')  # Ví dụ: '2024-03'
-        selected_to_month = request.form.get('to_month')      # Ví dụ: '2024-04'
+        selected_from_month = request.form.get('from_month') 
+        selected_to_month = request.form.get('to_month')      
 
         if selected_from_month and selected_to_month:
-            # Chuyển đổi từ chuỗi 'YYYY-MM' sang datetime đầu tháng
             from_year, from_month = map(int, selected_from_month.split('-'))
             to_year, to_month = map(int, selected_to_month.split('-'))
 
-            # Ngày bắt đầu: ngày 01 của tháng bắt đầu
             start_date = datetime(from_year, from_month, 1)
-
-            # Ngày kết thúc: ngày cuối tháng của tháng kết thúc
             last_day = calendar.monthrange(to_year, to_month)[1]
             end_date = datetime(to_year, to_month, last_day)
 
-    # Truy vấn tổng số lượng nhập và tổng giá trị nhập của từng sản phẩm
     query = db.session.query(
-        Products.product_id,
-        Products.name.label('product_name'),
-        Suppliers.name.label('supplier_name'),
+        Goods_Receipt_Details.product_id,
+        Goods_Receipt_Details.product_name,
+        Goods_Receipt.supplier.label('supplier_name'), 
         func.sum(Goods_Receipt_Details.quantity).label('total_quantity'),
         func.sum(Goods_Receipt_Details.quantity * Goods_Receipt_Details.price).label('total_price')
     )\
-    .join(Goods_Receipt_Details, Products.product_id == Goods_Receipt_Details.product_id)\
-    .join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)\
-    .join(Suppliers, Suppliers.supplier_id == Products.supplier_id)
+    .join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)
 
-    # Lọc theo khoảng thời gian nếu có
     if start_date and end_date:
-        query = query.filter(Goods_Receipt.import_date >= start_date,
-                             Goods_Receipt.import_date <= end_date)
+        query = query.filter(
+            Goods_Receipt.import_date >= start_date,
+            Goods_Receipt.import_date <= end_date
+        )
 
-    # Nhóm theo sản phẩm và nhà cung cấp
-    product_import_stats = query.group_by(Products.product_id, Products.name, Suppliers.name).all()
+    product_import_stats = query.group_by(
+        Goods_Receipt_Details.product_id,
+        Goods_Receipt_Details.product_name,
+        Goods_Receipt.supplier
+    ).all()
 
-    # Tổng chi phí nhập hàng
     total_query = db.session.query(
         func.sum(Goods_Receipt_Details.quantity * Goods_Receipt_Details.price)
     ).join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)
 
     if start_date and end_date:
-        total_query = total_query.filter(Goods_Receipt.import_date >= start_date,
-                                         Goods_Receipt.import_date <= end_date)
+        total_query = total_query.filter(
+            Goods_Receipt.import_date >= start_date,
+            Goods_Receipt.import_date <= end_date
+        )
 
     total_import_cost = total_query.scalar() or 0
 
@@ -771,6 +910,43 @@ def goods_receipt_stats():
 
 
 
+# @app.route('/goods-receipt/export', methods=['POST'])
+# @login_required
+# def export_goods_receipt_excel():
+#     from_month = request.form.get('from_month')
+#     to_month = request.form.get('to_month')
+
+#     if not from_month or not to_month:
+#         return redirect(url_for('goods_receipt_stats'))
+
+#     from_year, from_m = map(int, from_month.split('-'))
+#     to_year, to_m = map(int, to_month.split('-'))
+
+#     start_date = datetime(from_year, from_m, 1)
+#     end_date = datetime(to_year, to_m, calendar.monthrange(to_year, to_m)[1])
+
+#     # Truy vấn dữ liệu như ở hàm thống kê
+#     query = db.session.query(
+#         Products.name.label('Product Name'),
+#         Suppliers.name.label('Supplier Name'),
+#         func.sum(Goods_Receipt_Details.quantity).label('Quantity'),
+#         func.sum(Goods_Receipt_Details.quantity * Goods_Receipt_Details.price).label('Total Price')
+#     )\
+#     .join(Goods_Receipt_Details, Products.product_id == Goods_Receipt_Details.product_id)\
+#     .join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)\
+#     .join(Suppliers, Suppliers.supplier_id == Products.supplier_id)\
+#     .filter(Goods_Receipt.import_date >= start_date, Goods_Receipt.import_date <= end_date)\
+#     .group_by(Products.name, Suppliers.name).all()
+
+#     df = pd.DataFrame(query, columns=['Product Name', 'Supplier Name', 'Quantity', 'Total Price'])
+
+#     output = BytesIO()
+#     with pd.ExcelWriter(output, engine='openpyxl') as writer:
+#         df.to_excel(writer, index=False, sheet_name='Thống kê nhập hàng')
+#     output.seek(0)
+
+#     filename = f'stats_{from_month}_to_{to_month}.xlsx'
+#     return send_file(output, download_name=filename, as_attachment=True)
 
 @app.route('/goods-receipt/export', methods=['POST'])
 @login_required
@@ -787,23 +963,20 @@ def export_goods_receipt_excel():
     start_date = datetime(from_year, from_m, 1)
     end_date = datetime(to_year, to_m, calendar.monthrange(to_year, to_m)[1])
 
-    # Truy vấn dữ liệu như ở hàm thống kê
+    # Truy vấn chỉ từ 2 bảng
     query = db.session.query(
-        Products.name.label('Product Name'),
-        Suppliers.name.label('Supplier Name'),
+        Goods_Receipt_Details.product_name.label('Product Name'),
+        Goods_Receipt.supplier.label('Supplier Name'),
         func.sum(Goods_Receipt_Details.quantity).label('Quantity'),
         func.sum(Goods_Receipt_Details.quantity * Goods_Receipt_Details.price).label('Total Price')
     )\
-    .join(Goods_Receipt_Details, Products.product_id == Goods_Receipt_Details.product_id)\
     .join(Goods_Receipt, Goods_Receipt.receipt_id == Goods_Receipt_Details.receipt_id)\
-    .join(Suppliers, Suppliers.supplier_id == Products.supplier_id)\
     .filter(Goods_Receipt.import_date >= start_date, Goods_Receipt.import_date <= end_date)\
-    .group_by(Products.name, Suppliers.name).all()
+    .group_by(Goods_Receipt_Details.product_name, Goods_Receipt.supplier)\
+    .all()
 
-    # Tạo DataFrame
     df = pd.DataFrame(query, columns=['Product Name', 'Supplier Name', 'Quantity', 'Total Price'])
 
-    # Xuất ra Excel
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Thống kê nhập hàng')
@@ -811,6 +984,7 @@ def export_goods_receipt_excel():
 
     filename = f'stats_{from_month}_to_{to_month}.xlsx'
     return send_file(output, download_name=filename, as_attachment=True)
+
 
 
 if __name__ == '__main__':

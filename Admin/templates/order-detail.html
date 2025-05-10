@@ -62,13 +62,13 @@
                 </tr>
             </thead>
             <tbody>
-                {% for detail, product, supplier in details %}
+                {% for detail in details %}
                 <tr>
-                    <td>{{ product.name }}</td>
+                    <td>{{ detail.product_name }}</td>
                     
                     <td>{{ detail.quantity }}</td>
                     <td>{{ "{:,.0f}".format(detail.price) }}</td>
-                    <td>{{ supplier.name }}</td>
+                    <td>{{ detail.supplier }}</td>
                 </tr>
             {% endfor %}
             </tbody>
