@@ -61,18 +61,31 @@ if ($stmt->execute()) {
         $quantity = $item['quantity'] ?? 0;
         $price = $item['price'] ?? 0;
         $total = $item['total'] ?? 0;
+        $product_name = $item['product_name'];
+        $supplier = $item['supplier'];
 
         if (empty($product_id) || $quantity <= 0 || $price <= 0 || $total <= 0) {
             echo json_encode(["success" => false, "message" => "Thông tin sản phẩm không hợp lệ."]);
             exit;
         }
 
-        $detailQuery = "INSERT INTO order_details (order_id, product_id, quantity, price, total) VALUES (?, ?, ?, ?, ?)";
+        // Thêm chi tiết đơn hàng
+        $detailQuery = "INSERT INTO order_details (order_id, product_id, quantity, price, total, product_name, supplier) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmtDetail = $conn->prepare($detailQuery);
-        $stmtDetail->bind_param("iiidd", $order_id, $product_id, $quantity, $price, $total);
+        $stmtDetail->bind_param("iiiddss", $order_id, $product_id, $quantity, $price, $total, $product_name, $supplier);
 
         if (!$stmtDetail->execute()) {
             echo json_encode(["success" => false, "message" => "Lỗi khi lưu chi tiết đơn hàng: " . $stmtDetail->error]);
+            exit;
+        }
+
+        // Cập nhật số lượng sản phẩm trong bảng products
+        $updateStockQuery = "UPDATE products SET quantity = quantity - ? WHERE product_id = ?";
+        $stmtUpdateStock = $conn->prepare($updateStockQuery);
+        $stmtUpdateStock->bind_param("ii", $quantity, $product_id);
+
+        if (!$stmtUpdateStock->execute()) {
+            echo json_encode(["success" => false, "message" => "Lỗi khi cập nhật số lượng sản phẩm: " . $stmtUpdateStock->error]);
             exit;
         }
     }

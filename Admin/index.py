@@ -563,7 +563,7 @@ def order_stats():
         OrderDetails.product_name,
         func.sum(OrderDetails.quantity).label('quantity'),
         func.sum(OrderDetails.quantity * OrderDetails.price).label('total')
-    ).join(Orders, Orders.order_id == OrderDetails.order_id)
+    ).join(Orders, Orders.order_id == OrderDetails.order_id).filter(Orders.status == 'shipped')
 
     if start_date and end_date:
         query = query.filter(Orders.order_date >= start_date,
@@ -651,7 +651,7 @@ def export_order_stats_excel():
         func.sum(OrderDetails.quantity).label('Quantity'),
         func.sum(OrderDetails.quantity * OrderDetails.price).label('Total Price')
     ).join(Orders, Orders.order_id == OrderDetails.order_id)\
-     .filter(Orders.order_date >= start_date, Orders.order_date <= end_date)\
+     .filter(Orders.order_date >= start_date, Orders.order_date <= end_date, Orders.status == 'shipped')\
      .group_by(OrderDetails.product_id, OrderDetails.product_name).all()
 
     df = pd.DataFrame(query, columns=['Product ID', 'Product Name', 'Quantity', 'Total Price'])

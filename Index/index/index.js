@@ -451,7 +451,7 @@ function addToCart(productId) {
     const username = currentUser.username;
 
     // Kiểm tra số lượng tồn kho
-    if (product.stock <= 0) {
+    if (product.quantity <= 0) {
         alert("Sản phẩm đã hết hàng trong kho.");
         return;
     }
@@ -983,6 +983,7 @@ function showProductDetail(productId) {
                 <p><strong>Mã sản phẩm:</strong> ${product.product_id}</p>
                 <p><strong>Tên sản phẩm:</strong> ${product.name}</p>
                 <p><strong>Mô tả:</strong> ${product.description}</p>
+                <p><strong>Nhà cung cấp:</strong> ${product.supplier}</p>
                 <p><strong>Giá:</strong> ${formattedPrice}</p>
                 <p><strong>Còn lại:</strong> ${product.quantity}</p>
                 <button onclick="addToCart('${product.product_id}')">MUA NGAY</button>
@@ -1094,9 +1095,10 @@ function showOrderDetails(orderId) {
             
             let itemsHTML = data.map(item => `
                 <tr>
-                    <td>${item.product_id}</td>
+                    <td>${item.product_name}</td>
                     <td>${item.quantity}</td>
                     <td>${vnd(item.price)}</td>
+                    <td>${item.supplier}</td>
                     <td>${vnd(item.total)}</td>
                 </tr>
             `).join('');
@@ -1106,9 +1108,10 @@ function showOrderDetails(orderId) {
                     <h3>Chi tiết đơn hàng #${orderId}</h3>
                     <table>
                         <tr>
-                            <th>Mã SP</th>
+                            <th>Tên sản phẩm</th>
                             <th>Số lượng</th>
                             <th>Đơn giá</th>
+                            <th>Nhà cung cấp</th>
                             <th>Thành tiền</th>
                         </tr>
                         ${itemsHTML}
@@ -1251,7 +1254,9 @@ function createNewOrder(cartKey, customerID) {
             product_id: item.product_id,
             quantity: item.soluong,
             price: item.price,
-            total: item.soluong * item.price
+            total: item.soluong * item.price,
+            product_name: item.name,
+            supplier: item.supplier,
         }))
     };
 
@@ -1413,7 +1418,7 @@ function showPreviewOrder() {
             totalPrice += detail.price * detail.soluong; // Tính tổng tiền
             return `
                 <tr>
-                    <td>${detail.product_id}</td>
+                    <td>${detail.name}</td>
                     <td>${detail.soluong}</td>
                     <td>${detail.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                     <td>${(detail.soluong * detail.price).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
@@ -1439,7 +1444,7 @@ function showPreviewOrder() {
                     <table id="orderDe" border="1" cellspacing="0" cellpadding="5" style="width: 100%; text-align: left;">
                         <thead>
                             <tr>
-                                <th>Mã sản phẩm</th>
+                                <th>Tên sản phẩm</th>
                                 <th>Số lượng</th>
                                 <th>Đơn giá</th>
                                 <th>Thành tiền</th>

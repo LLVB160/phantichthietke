@@ -4,7 +4,7 @@ include 'connect.php';
 
 $order_id = $_GET['order_id'];
 
-$sql = "SELECT product_id, quantity, price, total 
+$sql = "SELECT *
         FROM order_details 
         WHERE order_id = ?";
 
