@@ -131,3 +131,200 @@ Kết quả truy vấn: Array
     [phone] => 0373390048
     [address] => TPHCM
 )
+Dữ liệu nhận được: Array
+(
+    [username] => huynh
+    [password] => huynhh
+)
+Dữ liệu nhận được: Array
+(
+    [username] => huynh
+    [password] => huynhh
+)
+Dữ liệu nhận được: Array
+(
+    [username] => minhnguyen
+    [password] => minh123
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 1
+    [username] => minhnguyen
+    [email] => minhnguyen@gmail.com
+    [role] => admin
+    [created_at] => 2024-01-01 10:00:00
+    [full_name] => Nguyễn Văn Minh
+    [phone] => 0373390048
+    [address] => TPHCM
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 1
+    [username] => minhnguyen
+    [email] => minhnguyen@gmail.com
+    [role] => admin
+    [created_at] => 2024-01-01 10:00:00
+    [full_name] => Nguyễn Văn Minh
+    [phone] => 0373390048
+    [address] => TPHCM
+)
+Dữ liệu nhận được: Array
+(
+    [username] => khoapham
+    [password] => khoa789
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 3
+    [username] => khoapham
+    [email] => khoap@gmail.com
+    [role] => admin
+    [created_at] => 2023-12-15 14:20:00
+    [full_name] => Phạm Minh Khoa
+    [phone] => 0909123456
+    [address] => 1A Hùng Vương, Đà Nẵng
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 3
+    [username] => khoapham
+    [email] => khoap@gmail.com
+    [role] => admin
+    [created_at] => 2023-12-15 14:20:00
+    [full_name] => Phạm Minh Khoa
+    [phone] => 0909123456
+    [address] => 1A Hùng Vương, Đà Nẵng
+)
+Dữ liệu nhận được: Array
+(
+    [username] => thuy
+    [password] => linh456
+)
+Dữ liệu nhận được: Array
+(
+    [username] => thuy
+    [password] => linh456
+)
+Dữ liệu nhận được: Array
+(
+    [username] => thuylinh
+    [password] => linh456
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 2
+    [username] => thuylinh
+    [email] => thuylinh@gmail.com
+    [role] => customer
+    [created_at] => 2024-01-05 09:30:00
+    [full_name] => Lê Thùy Linh
+    [phone] => 0987654321
+    [address] => 45 Nguyễn Trãi, Hà Nội
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 2
+    [username] => thuylinh
+    [email] => thuylinh@gmail.com
+    [role] => customer
+    [created_at] => 2024-01-05 09:30:00
+    [full_name] => Lê Thùy Linh
+    [phone] => 0987654321
+    [address] => 45 Nguyễn Trãi, Hà Nội
+)
+Dữ liệu nhận được: Array
+(
+    [username] => khoapham
+    [password] => khoa789
+)
+Dữ liệu nhận được: Array
+(
+    [username] => khoapham
+    [password] => khoa789
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 3
+    [username] => khoapham
+    [email] => khoap@gmail.com
+    [role] => admin
+    [created_at] => 2023-12-15 14:20:00
+    [full_name] => Phạm Minh Khoa
+    [phone] => 0909123456
+    [address] => 1A Hùng Vương, Đà Nẵng
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 3
+    [username] => khoapham
+    [email] => khoap@gmail.com
+    [role] => admin
+    [created_at] => 2023-12-15 14:20:00
+    [full_name] => Phạm Minh Khoa
+    [phone] => 0909123456
+    [address] => 1A Hùng Vương, Đà Nẵng
+)
+Dữ liệu nhận được: Array
+(
+    [username] => hoanglong
+    [password] => long111
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 4
+    [username] => hoanglong
+    [email] => hoanglong@gmail.com
+    [role] => employee
+    [created_at] => 2023-11-20 08:45:00
+    [full_name] => Trần Hoàng Long
+    [phone] => 0922334455
+    [address] => 22 Phan Đăng Lưu, Huế
+)
+Dữ liệu nhận được: Array
+(
+    [username] => hoanglong
+    [password] => long111
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 4
+    [username] => hoanglong
+    [email] => hoanglong@gmail.com
+    [role] => employee
+    [created_at] => 2023-11-20 08:45:00
+    [full_name] => Trần Hoàng Long
+    [phone] => 0922334455
+    [address] => 22 Phan Đăng Lưu, Huế
+)
+Dữ liệu nhận được: Array
+(
+    [username] => thuylinh
+    [password] => linh456
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 2
+    [username] => thuylinh
+    [email] => thuylinh@gmail.com
+    [role] => customer
+    [created_at] => 2024-01-05 09:30:00
+    [full_name] => Lê Thùy Linh
+    [phone] => 0987654321
+    [address] => 45 Nguyễn Trãi, Hà Nội
+)
+Dữ liệu nhận được: Array
+(
+    [username] => thuylinh
+    [password] => linh456
+)
+Kết quả truy vấn: Array
+(
+    [user_id] => 2
+    [username] => thuylinh
+    [email] => thuylinh@gmail.com
+    [role] => customer
+    [created_at] => 2024-01-05 09:30:00
+    [full_name] => Lê Thùy Linh
+    [phone] => 0987654321
+    [address] => 45 Nguyễn Trãi, Hà Nội
+)

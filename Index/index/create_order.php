@@ -50,7 +50,7 @@ if ($row['count'] == 0) {
 // Thêm đơn hàng vào bảng orders
 $orderQuery = "INSERT INTO orders (user_id, total_amount, payment_method) VALUES (?, ?, ?)";
 $stmt = $conn->prepare($orderQuery);
-$stmt->bind_param("ids", $user_id, $total_amount, $payment_method);
+$stmt->bind_param("id s", $user_id, $total_amount, $payment_method);
 
 if ($stmt->execute()) {
     $order_id = $stmt->insert_id; // Lấy ID của đơn hàng vừa thêm

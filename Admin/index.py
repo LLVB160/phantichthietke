@@ -27,7 +27,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@localhost/pttkhtttdb2'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/pttkhtttdb2'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'abcxyz123'
 
@@ -573,7 +573,7 @@ def order_stats():
 
     total_query = db.session.query(
         func.sum(OrderDetails.quantity * OrderDetails.price)
-    ).join(Orders, Orders.order_id == OrderDetails.order_id)
+    ).join(Orders, Orders.order_id == OrderDetails.order_id).filter(Orders.status == 'shipped')
 
     if start_date and end_date:
         total_query = total_query.filter(Orders.order_date >= start_date,
@@ -702,9 +702,10 @@ def newReceipt():
     if request.method == 'POST':
         supplier= request.form.get('supplier', '').strip()
 
-        supplier_name = db.session.query(Suppliers).get(int(supplier))
 
         try:
+            supplier_name = db.session.query(Suppliers).get(int(supplier))
+
             new_receipt = Goods_Receipt(
                 supplier_id=int(supplier),
                 supplier=supplier_name.name
@@ -733,10 +734,11 @@ def newReceiptDetail():
         quantity = request.form.get('quantity', '').strip()
         price = request.form.get('price', '').strip()
 
-        product_name = db.session.query(Products).get(int(product))
 
 
         try:
+            product_name = db.session.query(Products).get(int(product))
+
             new_receipt_detail = Goods_Receipt_Details(
                 product_id=int(product),
                 receipt_id=int(receipt),
